@@ -1,0 +1,161 @@
+# MartianTinder Development Rules & Guidelines
+
+## Essential Context Loading
+- ALWAYS load PROJECT_OVERVIEW.md first when starting new context windows
+- Check TODO.md for current sprint status and task priorities before making assumptions
+- Review recent git commits and current branch to understand development progress
+- Reference the glossary in PROJECT_OVERVIEW.md for consistent terminology
+
+## Project-Specific Guidelines
+
+### Architecture Decisions
+- Single Next.js 15 application using App Router (never suggest Pages Router)
+- Prisma + SQLite for development, designed for easy PostgreSQL migration
+- No background workers or job queues in MVP - compute status at read-time
+- Local file storage with abstraction layer for future cloud storage migration
+- Auth.js with email magic links (configurable SMTP provider)
+
+### Business Logic Rules
+- Proposals with threshold=0 function as announcements (no support required)
+- Support signals have three visibility levels: public, private, anonymous
+- Feed ordering is FIFO by default, with expired items moved to separate bucket
+- Channels provide Discord-like privacy (invite-only access to proposals)
+- Proposal → Event reification only happens after owner confirmation
+
+### Data Model Consistency
+- Always use the exact Prisma schema provided in PROJECT_OVERVIEW.md
+- Maintain proper relationships between User, Channel, Proposal, Event models
+- Use cuid() for all ID generation
+- Follow the established field naming conventions
+
+### API Design Patterns
+- Use Zod schemas for all API route validation
+- Implement proper error handling with appropriate HTTP status codes
+- Follow RESTful conventions as outlined in the roadmap
+- Use transactions for operations affecting multiple records
+- Return consistent response formats across endpoints
+
+### UI/UX Standards
+- Mobile-first responsive design using Tailwind CSS
+- Use shadcn/ui components as foundation, customize as needed
+- Implement swipeable card metaphor for main proposal feed
+- Support both touch and keyboard navigation
+- Optimistic UI updates for user interactions (especially support signals)
+
+## Code Quality Standards
+
+### TypeScript Usage
+- Use strict TypeScript configuration
+- Define proper interfaces for all data structures
+- Use Zod for runtime validation and type inference
+- Avoid 'any' types - use proper type definitions
+
+### Component Architecture
+- Functional components with hooks (no class components)
+- Separate business logic from presentation logic
+- Use custom hooks for complex state management
+- Implement proper error boundaries
+
+### Database Operations
+- Use Prisma Client for all database interactions
+- Implement proper error handling for database operations
+- Use database transactions for multi-step operations
+- Follow the established schema relationships
+
+### Security Practices
+- Validate all user inputs with Zod schemas
+- Implement authentication guards on protected routes
+- Sanitize user-generated content
+- Secure file upload handling with type and size validation
+- Use environment variables for sensitive configuration
+
+## Development Workflow
+
+### Task Management
+- Check TODO.md status before starting new work
+- Update task status in real-time as work progresses
+- Mark tasks complete immediately when finished
+- Add new tasks if scope expands or issues are discovered
+- Summarize progress at session end in TODO.md ## Done section
+
+### Git Practices
+- Use descriptive commit messages referencing sprint and feature
+- Commit frequently with logical, atomic changes
+- Reference TODO.md task IDs in commit messages when applicable
+
+### Testing Strategy
+- Focus on happy path functionality for MVP
+- Use TypeScript for compile-time validation
+- Manual testing for critical user flows
+- Implement basic end-to-end tests in Sprint 5
+
+## Common Patterns & Conventions
+
+### File Naming
+- Use kebab-case for file names (proposal-card.tsx)
+- Use PascalCase for component names (ProposalCard)
+- Use camelCase for function and variable names
+- Use SCREAMING_SNAKE_CASE for constants
+
+### API Route Structure
+```
+/api/auth/*           - Authentication (Auth.js)
+/api/channels         - Channel CRUD
+/api/proposals        - Proposal CRUD
+/api/proposals/:id/signal  - Support signals
+/api/proposals/:id/state   - User state (skip/dismiss/star)
+/api/proposals/:id/reify   - Convert to event
+/api/feed             - Channel feed with filtering
+/api/ics/*            - Calendar file generation
+```
+
+### Component Patterns
+- Use composition over inheritance
+- Implement loading and error states
+- Use React.Suspense for async components
+- Follow shadcn/ui patterns for form handling
+
+## Error Handling
+- Implement proper error boundaries in React
+- Use appropriate HTTP status codes in API responses
+- Provide user-friendly error messages
+- Log errors for debugging without exposing sensitive information
+
+## Performance Considerations
+- Use Next.js Image component for all images
+- Implement proper loading states
+- Use React.memo for expensive components
+- Optimize database queries with proper indexing
+- Implement pagination for large data sets
+
+## Configuration Management
+- Use .env files for environment-specific configuration
+- Provide .env.example with all required variables
+- Use zod for environment variable validation
+- Support both development and production configurations
+- Abstract external service configuration (SMTP, storage, etc.)
+
+## Debugging & Development
+- Use proper TypeScript types to catch errors at compile time
+- Implement comprehensive logging for debugging
+- Use Prisma Studio for database inspection during development
+- Set up proper development vs production environment handling
+
+## Sprint-Specific Focus
+- Stay within current sprint scope as defined in TODO.md
+- Implement core functionality before adding polish
+- Avoid feature creep beyond MVP requirements
+- Build with future extensibility in mind but don't over-engineer
+
+## Communication Standards
+- Reference specific files, functions, and components by name
+- Use the established glossary terms from PROJECT_OVERVIEW.md
+- Provide clear, actionable feedback on code issues
+- Explain architectural decisions when they deviate from standards
+
+## When in Doubt
+- Refer to PROJECT_OVERVIEW.md for business logic clarification
+- Check TODO.md for current priorities
+- Follow the established patterns in existing code
+- Ask specific questions rather than making assumptions
+- Prioritize MVP functionality over advanced features 
