@@ -166,6 +166,9 @@ export async function GET(request: NextRequest) {
       include: {
         channel: true,
         owner: true,
+        images: {
+          orderBy: { order: 'asc' }
+        },
         supports: {
           where: { userId: session.user.id }
         },

@@ -7,8 +7,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
+import { ImageUpload } from "@/components/ui/image-upload"
 import { Calendar, Clock, Save } from "lucide-react"
-import type { Channel } from "@prisma/client"
+// Channel type definition
+interface Channel {
+  id: string
+  name: string
+  description?: string | null
+}
 
 interface ProposalFormProps {
   channels: Channel[]
@@ -34,6 +40,7 @@ export function ProposalForm({ channels, editingProposal }: ProposalFormProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [publishMode, setPublishMode] = useState<'draft' | 'now' | 'scheduled'>('now')
+  const [uploadedImages, setUploadedImages] = useState<Array<{url: string, fileName: string}>>([])
   const [formData, setFormData] = useState({
     title: "",
     note: "",
@@ -62,6 +69,7 @@ export function ProposalForm({ channels, editingProposal }: ProposalFormProps) {
         maxCapacity: formData.maxCapacity ? parseInt(formData.maxCapacity) : undefined,
         threshold: formData.threshold ? parseInt(formData.threshold) : undefined,
         externalChatUrl: formData.externalChatUrl || undefined,
+        images: uploadedImages.length > 0 ? uploadedImages : undefined,
       }
 
       // Handle publish/draft logic
@@ -83,8 +91,10 @@ export function ProposalForm({ channels, editingProposal }: ProposalFormProps) {
 
       // Add suggested event date as part of description if provided
       if (formData.suggestedEventDate) {
-        submitData.note += `\n\n📅 Suggested event timing: ${formData.suggestedEventDate}`
+        submitData.suggestedEventDate = formData.suggestedEventDate
       }
+
+      console.log("Submitting proposal data:", submitData)
 
       const response = await fetch("/api/proposals", {
         method: "POST",
@@ -93,11 +103,14 @@ export function ProposalForm({ channels, editingProposal }: ProposalFormProps) {
         body: JSON.stringify(submitData),
       })
 
-      if (response.ok) {
-        const result = await response.json()
+      const result = await response.json()
+      console.log("API response:", result)
+
+      if (response.ok && result.success) {
         router.push(`/p/${result.data.id}`)
       } else {
-        console.error("Failed to create proposal")
+        console.error("Failed to create proposal:", result)
+        alert(`Failed to create proposal: ${result.error || result.details || 'Unknown error'}`)
       }
     } catch (error) {
       console.error("Error creating proposal:", error)
@@ -161,6 +174,22 @@ export function ProposalForm({ channels, editingProposal }: ProposalFormProps) {
               placeholder="Provide details about your proposal..."
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 min-h-[100px]"
               required
+            />
+          </div>
+
+          {/* Image Upload */}
+          <div className="space-y-2">
+            <Label>Images</Label>
+            <ImageUpload
+              onUpload={(files) => {
+                setUploadedImages(prev => [...prev, ...files.map(f => ({ url: f.url, fileName: f.fileName }))])
+              }}
+              onRemove={(fileName) => {
+                setUploadedImages(prev => prev.filter(img => img.fileName !== fileName))
+              }}
+              subDir="proposals"
+              maxFiles={5}
+              disabled={isLoading}
             />
           </div>
 

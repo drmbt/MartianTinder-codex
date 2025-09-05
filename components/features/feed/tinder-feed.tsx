@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { ImageGallery } from "@/components/ui/image-gallery"
 import { Heart, Star, ThumbsDown, X, ArrowLeft, ArrowRight, ArrowUp, ArrowDown } from "lucide-react"
 import Link from "next/link"
 
@@ -15,6 +16,7 @@ interface ProposalData {
   createdAt: Date
   expiresAt: Date | null
   imageUrl: string | null
+  images?: Array<{ url: string; order: number }> // New image gallery support
   externalChatUrl: string | null
   suggestedEventDate: string | null
   channel: {
@@ -174,21 +176,27 @@ export function TinderFeed({ proposals }: TinderFeedProps) {
 
       {/* Proposal Card */}
       <Card className={`transition-all duration-300 ${isAnimating ? 'scale-95 opacity-50' : 'scale-100 opacity-100'}`}>
+        {/* Image Gallery */}
+        {(currentProposal.images?.length || currentProposal.imageUrl) && (
+          <div className="relative w-full">
+            <ImageGallery 
+              images={
+                currentProposal.images && currentProposal.images.length > 0 
+                  ? currentProposal.images.sort((a, b) => a.order - b.order).map(img => img.url)
+                  : currentProposal.imageUrl ? [currentProposal.imageUrl] : []
+              }
+              className="w-full h-64 sm:h-80 md:h-96"
+              alt={currentProposal.title}
+            />
+          </div>
+        )}
+        
         <CardHeader>
-          <div className="flex items-start justify-between">
-            <div className="space-y-2">
-              <CardTitle className="text-xl">{currentProposal.title}</CardTitle>
-              <CardDescription>
-                by {currentProposal.owner.name || currentProposal.owner.email} in {currentProposal.channel.name}
-              </CardDescription>
-            </div>
-            {currentProposal.imageUrl && (
-              <img 
-                src={currentProposal.imageUrl} 
-                alt={currentProposal.title}
-                className="w-16 h-16 object-cover rounded-lg"
-              />
-            )}
+          <div className="space-y-2">
+            <CardTitle className="text-xl">{currentProposal.title}</CardTitle>
+            <CardDescription>
+              by {currentProposal.owner.name || currentProposal.owner.email} in {currentProposal.channel.name}
+            </CardDescription>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">

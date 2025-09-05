@@ -14,9 +14,11 @@ model User {
   id            String   @id @default(cuid())
   email         String   @unique
   name          String?
-  image         String?
+  image         String?  // Primary profile image (for backwards compatibility)
+  bio           String?
   emailVerified DateTime?
   createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt @default(now())
   
   // Relations
   memberships ChannelMember[]
@@ -25,6 +27,7 @@ model User {
   proposals   Proposal[]
   accounts    Account[]
   sessions    Session[]
+  images      UserImage[]
 }
 
 model Account {
@@ -94,7 +97,7 @@ model Proposal {
   ownerId        String
   title          String
   note           String
-  imageUrl       String?
+  imageUrl       String?  // Primary image (for backwards compatibility)
   minCapacity    Int?
   maxCapacity    Int?
   threshold      Int?     // if null, threshold == minCapacity || simple quorum rule
@@ -114,6 +117,7 @@ model Proposal {
   supports SupportSignal[]
   states   ProposalUserState[]
   event    Event?
+  images   ProposalImage[]
 }
 
 model SupportSignal {
@@ -153,9 +157,54 @@ model Event {
   startAt     DateTime
   endAt       DateTime?
   location    String?
+  imageUrl    String?  // Primary event image
   icsUid      String   @unique
   createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt @default(now())
   
   // Relations
   proposal Proposal @relation(fields: [proposalId], references: [id], onDelete: Cascade)
+  images   EventImage[]
+}
+
+model UserImage {
+  id        String   @id @default(cuid())
+  userId    String
+  url       String
+  fileName  String
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId, order])
+}
+
+model ProposalImage {
+  id         String   @id @default(cuid())
+  proposalId String
+  url        String
+  fileName   String
+  order      Int      @default(0)
+  createdAt  DateTime @default(now())
+  
+  // Relations
+  proposal Proposal @relation(fields: [proposalId], references: [id], onDelete: Cascade)
+  
+  @@index([proposalId, order])
+}
+
+model EventImage {
+  id        String   @id @default(cuid())
+  eventId   String
+  url       String
+  fileName  String
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  
+  // Relations
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  
+  @@index([eventId, order])
 }

@@ -1,6 +1,25 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* Image optimization utilities */
+.responsive-img {
+  max-width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+.responsive-img-contain {
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+/* Prevent images from breaking layout */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {

@@ -185,12 +185,13 @@ export function ProposalsList({ proposals }: ProposalsListProps) {
               <CardContent className="p-4">
                 <div className="flex items-start gap-3">
                   {/* Thumbnail */}
-                  <div className="w-12 h-12 bg-gray-100 rounded-lg flex-shrink-0 flex items-center justify-center">
+                  <div className="w-12 h-12 bg-gray-100 rounded-lg flex-shrink-0 flex items-center justify-center overflow-hidden">
                     {proposal.imageUrl ? (
                       <img
                         src={proposal.imageUrl}
                         alt={proposal.title}
                         className="w-full h-full object-cover rounded-lg"
+                        style={{ maxWidth: '100%', height: 'auto' }}
                       />
                     ) : (
                       <div className="text-gray-400 text-xl">💡</div>

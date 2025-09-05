@@ -37,6 +37,10 @@ export const createProposalSchema = z.object({
     (val) => !val || val === "" || z.string().url().safeParse(val).success,
     { message: "Must be a valid URL or empty" }
   ),
+  images: z.array(z.object({
+    url: z.string(),
+    fileName: z.string()
+  })).optional(),
   suggestedEventDate: z.string().optional(),
 }).refine(
   (data) => {

@@ -11,7 +11,10 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
+    console.log("Received proposal data:", body)
+    
     const validatedData = createProposalSchema.parse(body)
+    console.log("Validated proposal data:", validatedData)
 
     // Verify user is a member of the channel
     const membership = await prisma.channelMember.findUnique({
@@ -48,6 +51,7 @@ export async function POST(request: NextRequest) {
       include: {
         channel: true,
         owner: true,
+        images: true,
         _count: {
           select: {
             supports: true,
@@ -56,12 +60,39 @@ export async function POST(request: NextRequest) {
       },
     })
 
+    // Create image records if provided
+    if (validatedData.images && Array.isArray(validatedData.images) && validatedData.images.length > 0) {
+      try {
+        await prisma.proposalImage.createMany({
+          data: validatedData.images.map((img: any, index: number) => ({
+            proposalId: proposal.id,
+            url: img.url,
+            fileName: img.fileName,
+            order: index
+          }))
+        })
+      } catch (imageError) {
+        console.error("Error creating images:", imageError)
+        // Continue without failing the proposal creation
+      }
+    }
+
     return NextResponse.json({
       success: true,
       data: proposal,
     })
   } catch (error) {
     console.error("Error creating proposal:", error)
+    
+    // Return detailed error for debugging
+    if (error instanceof Error) {
+      return NextResponse.json({ 
+        error: "Internal server error", 
+        details: error.message,
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      }, { status: 500 })
+    }
+    
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 } 
