@@ -1,8 +1,8 @@
 # MartianTinder - Sprint Board
 
 **Project**: MartianTinder MVP  
-**Current Sprint**: Sprint 4 (Events & Calendar Integration)  
-**Last Updated**: Post-Sprint 3 Completion
+**Current Sprint**: Sprint 4 (5-Tab Navigation & Calendar Integration)  
+**Last Updated**: Post-Sprint 3 Architecture Review
 
 ---
 
@@ -62,89 +62,195 @@
 
 ---
 
-## Sprint 4: Events & Calendar Integration
+## Sprint 4: 5-Tab Navigation & Calendar Integration
+
+### 🔄 In Progress
+- [ ] **FEED Tab Implementation**
+  - [ ] Implement mobile-first bottom tab navigation structure
+  - [ ] Enhance existing Tinder feed as primary landing tab
+  - [ ] Add discovery settings/filters above feed cards
+  - [ ] Implement channel filtering, recency (24h), threshold status filters
+  - [ ] Optimize feed performance and loading states
 
 ### ⏳ Pending
-- [ ] Implement Event model and reification logic
-- [ ] Build event creation flow from threshold-met proposals
-- [ ] Integrate ical-generator for ICS file generation
-- [ ] Create `/api/ics/event/:id.ics` endpoint
-- [ ] Create `/api/ics/user/:id.ics` user feed endpoint
-- [ ] Implement "Add to Google Calendar" template link generation
-- [ ] Build dashboard with commitments and events overview
-- [ ] Create event detail pages with calendar export options
+- [ ] **ACTIVITY Tab Implementation**
+  - [ ] Create user interaction history page
+  - [ ] Design mini-card format with thumbnails and status emojis
+  - [ ] Implement chronological ordering of user interactions
+  - [ ] Add filtering by supported/opposed, keywords, channels
+  - [ ] Show support progress indicators on each mini-card
+
+- [ ] **PROPOSE Tab Implementation**
+  - [ ] Create user's own proposals management page
+  - [ ] Implement same mini-card format as Activity tab
+  - [ ] Add filters: All, Active, Supported (threshold met), Expired, Drafts
+  - [ ] Design floating "+" button for new proposal creation
+  - [ ] Integrate with existing proposal creation flow
+
+- [ ] **CALENDAR Tab Implementation**
+  - [ ] Build calendar component with Day/Week/Month views
+  - [ ] Implement proposal visualization (outline/transparent cards)
+  - [ ] Implement event visualization (solid cards for reified events)
+  - [ ] Add filtering to show only supported/participating events
+  - [ ] Integrate with Google Calendar strategy
+
+- [ ] **USER Tab Implementation**
+  - [ ] Create personal profile management interface
+  - [ ] Add bio, photos, social links, and handle fields
+  - [ ] Build settings and preferences configuration
+  - [ ] Implement integration management (Google Calendar, Discord)
+  - [ ] Add notification and privacy preferences
+
+- [ ] **Enhanced Calendar Integration**
+  - [ ] Implement Google Calendar channel creation strategy
+  - [ ] Build dual calendar system (channel + personal)
+  - [ ] Complete Event model and reification logic
+  - [ ] Integrate ical-generator for ICS file generation
+  - [ ] Create `/api/ics/event/:id.ics` endpoint
+  - [ ] Create `/api/ics/user/:id.ics` user feed endpoint
+  - [ ] Implement "Add to Google Calendar" template links
+  - [ ] Build automatic event addition to personal calendars
 
 ---
 
-## Sprint 5: Polish & Enhancement
+## Sprint 5: Mobile UX Polish & Advanced Features
 
 ### ⏳ Pending
-- [ ] Implement image upload handling with local file storage
-- [ ] Add external chat link integration and display
-- [ ] Build feed filtering system (supported, active, failed, past)
-- [ ] Implement basic image crop/fit functionality
-- [ ] Add proposal and event search capabilities
-- [ ] Create end-to-end tests with Playwright for critical user flows
-- [ ] Performance optimization and error handling improvements
-- [ ] Final UI polish and accessibility improvements
+- [ ] **Mobile-First UI/UX Enhancement**
+  - [ ] Polish 5-tab navigation with smooth transitions
+  - [ ] Implement swipe gestures for tab switching
+  - [ ] Optimize touch interactions and button sizing
+  - [ ] Add loading states and skeleton screens
+  - [ ] Implement pull-to-refresh functionality
+
+- [ ] **Enhanced Discovery & Filtering**
+  - [ ] Advanced search functionality across all tabs
+  - [ ] Keyword search in proposals and user content
+  - [ ] Smart filtering with multiple criteria combinations
+  - [ ] Saved filter presets for quick access
+  - [ ] Real-time search suggestions and autocomplete
+
+- [ ] **Media & Content Features**
+  - [ ] Implement image upload handling with local file storage
+  - [ ] Add basic image crop/fit functionality
+  - [ ] External chat link integration and display
+  - [ ] Rich text formatting for proposal descriptions
+  - [ ] Emoji reactions and status indicators
+
+- [ ] **Performance & Optimization**
+  - [ ] Implement virtual scrolling for large lists
+  - [ ] Add image lazy loading and optimization
+  - [ ] Optimize API response caching
+  - [ ] Performance monitoring and error tracking
+  - [ ] Bundle size optimization
+
+---
+
+## Sprint 6: Testing & Production Readiness
+
+### ⏳ Pending
+- [ ] **End-to-End Testing**
+  - [ ] Create Playwright test suite for critical user flows
+  - [ ] Test complete user journey from signup to event participation
+  - [ ] Cross-browser and device compatibility testing
+  - [ ] Performance testing under load
+  - [ ] Security testing and vulnerability assessment
+
+- [ ] **Production Deployment**
+  - [ ] Environment configuration for production
+  - [ ] Database migration from SQLite to PostgreSQL
+  - [ ] CI/CD pipeline setup
+  - [ ] Monitoring and logging infrastructure
+  - [ ] Backup and recovery procedures
+
+- [ ] **Documentation & Maintenance**
+  - [ ] Complete API documentation
+  - [ ] User guide and onboarding documentation
+  - [ ] Admin and deployment guides
+  - [ ] Code documentation and inline comments
+  - [ ] Maintenance and update procedures
 
 ---
 
 ## Future Enhancements (Post-MVP)
 
-### Authentication & Security
-- [ ] Google SSO integration
-- [ ] Advanced permission systems
-- [ ] Multi-factor authentication
-
-### Calendar & Scheduling
+### Advanced Calendar Integration
 - [ ] Real Google Calendar OAuth + API write integration
-- [ ] Availability windows and slot voting system
-- [ ] Calendly-style scheduling flows
+- [ ] Automatic calendar conflict detection and resolution
+- [ ] Calendly-style availability collection and slot voting
+- [ ] Integration with other calendar services (Outlook, Apple Calendar)
+- [ ] Advanced scheduling with time zone support
+
+### Community & Governance Features
+- [ ] Advanced moderation tools and content policies
+- [ ] Reputation systems and user verification badges
+- [ ] Cross-channel discovery with privacy controls
+- [ ] Community analytics and health dashboards
+- [ ] Advanced governance tools (voting, delegation, polls)
+
+### Mobile & PWA Features
+- [ ] PWA installation with offline caching
+- [ ] Push notifications for threshold met, event reminders
+- [ ] Voice-to-text proposal creation
+- [ ] Camera integration for image capture
+- [ ] Biometric authentication support
 
 ### Infrastructure & Scale
-- [ ] PostgreSQL migration from SQLite
-- [ ] Background job processing system
-- [ ] Cloud storage integration for images
-- [ ] WebSocket support for real-time updates
+- [ ] Multi-tenant architecture for organizations
+- [ ] Background job processing for notifications
+- [ ] Real-time updates via WebSockets
+- [ ] Cloud storage integration for images and files
+- [ ] Advanced security and audit logging
 
-### Community Features
-- [ ] Advanced moderation tools
-- [ ] Reputation and governance systems
-- [ ] Cross-channel discovery (with privacy controls)
-- [ ] Analytics and reporting dashboard
+### AI & Automation
+- [ ] AI-generated proposal images and content suggestions
+- [ ] Smart proposal categorization and tagging
+- [ ] Automated moderation and content filtering
+- [ ] Intelligent notification timing
+- [ ] Predictive analytics for proposal success
 
 ---
 
 ## Technical Debt & Improvements
 
 ### Code Quality
-- [ ] Comprehensive test coverage beyond happy path
-- [ ] Performance monitoring and optimization
-- [ ] Security audit and hardening
-- [ ] Code documentation and API docs
+- [ ] Comprehensive test coverage beyond happy path scenarios
+- [ ] Performance monitoring and optimization implementation
+- [ ] Security audit and hardening procedures
+- [ ] Code documentation and API documentation
+- [ ] TypeScript strict mode compliance across all files
 
 ### User Experience
-- [ ] Advanced mobile optimizations
-- [ ] Offline support and PWA features
-- [ ] Advanced accessibility features
-- [ ] Internationalization support
+- [ ] Advanced mobile optimizations and touch interactions
+- [ ] Accessibility improvements (WCAG compliance)
+- [ ] Internationalization support (i18n)
+- [ ] Dark mode implementation
+- [ ] High contrast and large text accessibility options
+
+### Infrastructure
+- [ ] Database query optimization and indexing
+- [ ] Caching strategy implementation (Redis)
+- [ ] CDN integration for static assets
+- [ ] Error tracking and monitoring (Sentry)
+- [ ] Performance analytics and user behavior tracking
 
 ---
 
 ## Configuration & Deployment
 
 ### Environment Setup
-- [ ] Development environment documentation
-- [ ] Production deployment guide
-- [ ] Environment variable documentation
+- [ ] Development environment documentation and setup scripts
+- [ ] Production deployment guide with Docker containerization
+- [ ] Environment variable documentation and validation
 - [ ] Database migration and backup procedures
+- [ ] SSL certificate and domain configuration
 
 ### Monitoring & Maintenance
-- [ ] Error tracking and monitoring setup
-- [ ] Performance monitoring
-- [ ] Backup and recovery procedures
-- [ ] Update and maintenance workflows
+- [ ] Error tracking and monitoring setup (Sentry, LogRocket)
+- [ ] Performance monitoring and alerting (Vercel Analytics)
+- [ ] Backup and recovery procedures testing
+- [ ] Update and maintenance workflow documentation
+- [ ] Security scanning and vulnerability monitoring
 
 ---
 
@@ -322,7 +428,7 @@
 - **Sprint 1**: ✅ COMPLETE
 - **Sprint 2**: ✅ COMPLETE  
 - **Sprint 3**: ✅ COMPLETE
-- **Ready for Sprint 4**: Events & Calendar Integration
+- **Ready for Sprint 4**: 5-Tab Navigation & Calendar Integration
 
 **User Experience Highlights:**
 - True "Tinder for proposals" interaction model
@@ -332,10 +438,11 @@
 - Intuitive scheduling workflow
 
 **Next Session Priorities:**
-1. **Navigation Architecture**: Define main tab structure
-2. **Event System**: Complete reification flow with calendar integration
-3. **ICS Generation**: Calendar file export functionality
-4. **Dashboard Enhancement**: Events and commitments overview
+1. **5-Tab Navigation**: Implement mobile-first bottom tab architecture
+2. **Calendar Integration**: Google Calendar strategy with channel calendars
+3. **Activity Tab**: User interaction history with mini-cards
+4. **Profile Management**: User tab with settings and integrations
+5. **Enhanced Discovery**: Advanced filtering and search capabilities
 
 **Test Flow for Sprint 3:**
 1. Visit `/feed` → See uninteracted proposals one at a time
@@ -343,4 +450,70 @@
 3. Create proposal → Choose Draft/Publish/Schedule options
 4. View `/drafts` → See unpublished proposals
 5. Edit/Delete proposals via owner dropdown menu
-6. Support proposals until threshold → Owner gets reification modal ~
+6. Support proposals until threshold → Owner gets reification modal
+
+---
+
+### Session 3 - Architecture Review & Planning
+**Date**: December 2024  
+**Duration**: ~1 hour
+**Focus**: 5-Tab Navigation Architecture Design & Sprint Reorganization
+
+**Major Accomplishments:**
+- ✅ **Architecture Review** - Comprehensive analysis of current state
+- ✅ **5-Tab Navigation Design** - Complete UX/UI architecture planning
+- ✅ **Google Calendar Strategy** - Enhanced integration approach
+- ✅ **Sprint Reorganization** - Aligned development phases with new architecture
+- ✅ **Documentation Update** - Updated PROJECT_OVERVIEW.md and TODO.md
+
+**Key Architecture Decisions:**
+
+1. **5-Tab Mobile-First Navigation:**
+   - **FEED**: Primary landing tab with Tinder-style discovery
+   - **ACTIVITY**: User interaction history with mini-cards
+   - **PROPOSE**: User's own proposals with management controls
+   - **CALENDAR**: Day/Week/Month views with proposal/event visualization
+   - **USER**: Profile management and settings
+
+2. **Enhanced Google Calendar Integration:**
+   - Auto-create shared Google Calendar per channel
+   - Dual calendar system: channel calendars + personal calendars
+   - Proposals appear as outline/transparent events
+   - Reified events automatically added to personal calendars
+   - Native Google Calendar filtering capabilities
+
+3. **Mini-Card Design System:**
+   - Consistent format across Activity and Propose tabs
+   - Thumbnail + status emoji + title + progress indicator
+   - Filtering and search capabilities
+   - Chronological ordering with smart grouping
+
+4. **Sprint Restructuring:**
+   - Sprint 4: Focus on 5-tab implementation + calendar integration
+   - Sprint 5: Mobile UX polish + advanced features
+   - Sprint 6: Testing + production readiness
+
+**Updated Documentation:**
+- PROJECT_OVERVIEW.md: Complete rewrite with new architecture
+- TODO.md: Reorganized sprints with detailed 5-tab implementation tasks
+- Enhanced scope definition with mobile-first approach
+- Detailed Google Calendar integration strategy
+
+**Current Status:**
+- **Sprints 1-3**: ✅ COMPLETE (Foundation + Interaction System)
+- **Sprint 4**: 🔄 IN PROGRESS (5-Tab Navigation + Calendar)
+- **Architecture**: ✅ DEFINED (Ready for implementation)
+
+**Next Session Priorities:**
+1. **Bottom Tab Navigation**: Implement 5-tab mobile-first structure
+2. **FEED Tab Enhancement**: Add discovery filters and settings
+3. **ACTIVITY Tab**: Build user interaction history interface
+4. **Calendar Integration**: Implement Google Calendar strategy
+5. **User Profile System**: Basic profile management and settings
+
+**Technical Planning:**
+- Mobile-first responsive design patterns
+- Bottom navigation with smooth tab transitions
+- Consistent mini-card component system
+- Calendar component with multiple view modes
+- Google Calendar API integration architecture
