@@ -6,6 +6,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Calendar, Users, MessageSquare, ExternalLink } from "lucide-react"
+import { SupportButtons } from "@/components/features/proposals/support-buttons"
+import { ProposalActions } from "@/components/features/proposals/proposal-actions"
+import { SupportType, SupportVisibility } from "@/types"
 import Link from "next/link"
 
 interface ProposalPageProps {
@@ -42,17 +45,27 @@ export default async function ProposalPage({ params }: ProposalPageProps) {
     },
   })
 
-  // Get support counts separately
-  const supportCounts = await prisma.supportSignal.groupBy({
-    by: ['type'],
-    where: { proposalId: id },
-    _count: true
-  })
+  // Get support counts and user's current signal
+  const [supportCounts, userSignal] = await Promise.all([
+    prisma.supportSignal.groupBy({
+      by: ['type'],
+      where: { proposalId: id },
+      _count: true
+    }),
+    prisma.supportSignal.findUnique({
+      where: {
+        userId_proposalId: {
+          userId: session.user.id,
+          proposalId: id,
+        },
+      },
+    })
+  ])
 
   const supportStats = {
-    supports: supportCounts.find(s => s.type === 'support')?._count || 0,
-    supersupports: supportCounts.find(s => s.type === 'supersupport')?._count || 0,
-    opposes: supportCounts.find(s => s.type === 'oppose')?._count || 0,
+    supports: supportCounts.find((s: any) => s.type === 'support')?._count || 0,
+    supersupports: supportCounts.find((s: any) => s.type === 'supersupport')?._count || 0,
+    opposes: supportCounts.find((s: any) => s.type === 'oppose')?._count || 0,
   }
 
   if (!proposal) {
@@ -106,21 +119,27 @@ export default async function ProposalPage({ params }: ProposalPageProps) {
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto space-y-6">
           {/* Header */}
-          <div className="flex items-center justify-between">
-            <Link href={`/c/${proposal.channelId}`} className="text-sm text-gray-500 hover:text-gray-700">
-              ← Back to {proposal.channel.name}
-            </Link>
-            <div className="flex items-center space-x-2">
-              <Badge variant={isPublished ? (isExpired ? "destructive" : "default") : "secondary"}>
-                {isExpired ? "Expired" : isPublished ? "Published" : "Draft"}
-              </Badge>
-              {proposal.event && (
-                <Badge variant="outline" className="bg-green-50">
-                  Event Created
-                </Badge>
-              )}
-            </div>
-          </div>
+                     <div className="flex items-center justify-between">
+             <Link href={`/c/${proposal.channelId}`} className="text-sm text-gray-500 hover:text-gray-700">
+               ← Back to {proposal.channel.name}
+             </Link>
+             <div className="flex items-center space-x-2">
+               <Badge variant={isPublished ? (isExpired ? "destructive" : "default") : "secondary"}>
+                 {isExpired ? "Expired" : isPublished ? "Published" : "Draft"}
+               </Badge>
+               {proposal.event && (
+                 <Badge variant="outline" className="bg-green-50">
+                   Event Created
+                 </Badge>
+               )}
+               <ProposalActions
+                 proposalId={proposal.id}
+                 isOwner={proposal.ownerId === session.user.id}
+                 hasEvent={!!proposal.event}
+                 title={proposal.title}
+               />
+             </div>
+           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Main Content */}
@@ -240,18 +259,15 @@ export default async function ProposalPage({ params }: ProposalPageProps) {
                        </div>
                      </div>
 
-                    {/* Support Actions */}
-                    <div className="space-y-2">
-                      <Button className="w-full bg-green-600 hover:bg-green-700">
-                        Support
-                      </Button>
-                      <Button className="w-full bg-blue-600 hover:bg-blue-700">
-                        Super Support
-                      </Button>
-                      <Button variant="outline" className="w-full text-red-600 border-red-300 hover:bg-red-50">
-                        Oppose
-                      </Button>
-                    </div>
+                    <SupportButtons
+                      proposalId={id}
+                      currentSignal={userSignal ? {
+                        type: userSignal.type as SupportType,
+                        visibility: userSignal.visibility as SupportVisibility
+                      } : null}
+                      stats={supportStats}
+                      threshold={threshold}
+                    />
                   </div>
                 </CardContent>
               </Card>

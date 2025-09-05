@@ -104,6 +104,7 @@ model Proposal {
   allowAnonymous Boolean  @default(false)
   moderationMode String   // "auto" | "manual"
   externalChatUrl String?
+  suggestedEventDate String? // Free text field for "next Tuesday" suggestions
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
   

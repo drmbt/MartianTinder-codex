@@ -55,11 +55,17 @@ export function Navbar() {
               🚀 MartianTinder
             </Link>
             <div className="hidden md:flex space-x-4">
+              <Link href="/feed" className="text-sm font-medium hover:text-orange-600 transition-colors">
+                Feed
+              </Link>
               <Link href="/channels" className="text-sm font-medium hover:text-orange-600 transition-colors">
                 Channels
               </Link>
               <Link href="/dashboard" className="text-sm font-medium hover:text-orange-600 transition-colors">
                 Dashboard
+              </Link>
+              <Link href="/drafts" className="text-sm font-medium hover:text-orange-600 transition-colors">
+                Drafts
               </Link>
             </div>
           </div>

@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Calendar, Users, MessageSquare, Plus } from "lucide-react"
+import { ChannelFeedClient } from "@/components/features/channels/channel-feed-client"
 import Link from "next/link"
 
 interface ChannelPageProps {
@@ -108,59 +109,36 @@ export default async function ChannelPage({ params }: ChannelPageProps) {
             </Link>
           </div>
 
-          {/* Proposals Feed */}
-          <div className="space-y-4">
-            {channel.proposals.length === 0 ? (
-              <Card>
-                <CardContent className="text-center py-12">
-                  <MessageSquare className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No proposals yet</h3>
-                  <p className="text-gray-500 mb-4">
-                    Be the first to share an idea with this channel
-                  </p>
-                  <Link href="/proposals/new">
-                    <Button>Create First Proposal</Button>
-                  </Link>
-                </CardContent>
-              </Card>
-            ) : (
-              channel.proposals.map((proposal) => (
-                <Link key={proposal.id} href={`/p/${proposal.id}`}>
-                  <Card className="hover:shadow-md transition-shadow cursor-pointer">
-                    <CardHeader>
-                      <div className="flex items-start justify-between">
-                        <div className="space-y-1">
-                          <CardTitle className="text-lg">{proposal.title}</CardTitle>
-                          <CardDescription>
-                            by {proposal.owner.name || proposal.owner.email}
-                          </CardDescription>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Badge variant="outline">
-                            {proposal._count.supports} support
-                          </Badge>
-                          {proposal.threshold === 0 && (
-                            <Badge variant="secondary">Announcement</Badge>
-                          )}
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-gray-600 line-clamp-2">{proposal.note}</p>
-                      <div className="flex items-center justify-between mt-3 text-sm text-gray-500">
-                        <span>{new Date(proposal.createdAt).toLocaleDateString()}</span>
-                        {proposal.expiresAt && (
-                          <span>
-                            Expires {new Date(proposal.expiresAt).toLocaleDateString()}
-                          </span>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
-              ))
-            )}
-          </div>
+                                {/* Proposals Feed with Client-side Filtering */}
+           <ChannelFeedClient 
+             proposals={channel.proposals.map(p => ({
+               id: p.id,
+               title: p.title,
+               note: p.note,
+               createdAt: p.createdAt.toISOString(),
+               expiresAt: p.expiresAt?.toISOString() || null,
+               threshold: p.threshold,
+               owner: p.owner,
+               _count: p._count
+             }))}
+             channelId={channelId}
+           />
+           
+           {/* Fallback for empty channel */}
+           {channel.proposals.length === 0 && (
+             <Card>
+               <CardContent className="text-center py-12">
+                 <MessageSquare className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                 <h3 className="text-lg font-medium text-gray-900 mb-2">No proposals yet</h3>
+                 <p className="text-gray-500 mb-4">
+                   Be the first to share an idea with this channel
+                 </p>
+                 <Link href="/proposals/new">
+                   <Button>Create First Proposal</Button>
+                 </Link>
+               </CardContent>
+             </Card>
+           )}
         </div>
       </div>
     </AuthenticatedLayout>

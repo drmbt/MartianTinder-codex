@@ -24,8 +24,8 @@ export const createProposalSchema = z.object({
   minCapacity: z.number().min(1).optional(),
   maxCapacity: z.number().min(1).optional(),
   threshold: z.number().min(0).optional(),
-  publishAt: z.date().optional(),
-  expiresAt: z.date().optional(),
+  publishAt: z.string().optional().nullable(),
+  expiresAt: z.string().optional().nullable(),
   visibility: z.enum(['channel', 'public']),
   allowAnonymous: z.boolean().default(false),
   moderationMode: z.enum(['auto', 'manual']),
@@ -37,6 +37,7 @@ export const createProposalSchema = z.object({
     (val) => !val || val === "" || z.string().url().safeParse(val).success,
     { message: "Must be a valid URL or empty" }
   ),
+  suggestedEventDate: z.string().optional(),
 }).refine(
   (data) => {
     if (data.maxCapacity && data.minCapacity) {
@@ -61,8 +62,8 @@ export const updateProposalSchema = z.object({
   minCapacity: z.number().min(1).optional(),
   maxCapacity: z.number().min(1).optional(),
   threshold: z.number().min(0).optional(),
-  publishAt: z.date().optional(),
-  expiresAt: z.date().optional(),
+  publishAt: z.union([z.string().datetime(), z.date(), z.literal("")]).optional(),
+  expiresAt: z.union([z.string().datetime(), z.date(), z.literal("")]).optional(),
   visibility: z.enum(['channel', 'public']).optional(),
   allowAnonymous: z.boolean().optional(),
   moderationMode: z.enum(['auto', 'manual']).optional(),
@@ -74,6 +75,7 @@ export const updateProposalSchema = z.object({
     (val) => !val || val === "" || z.string().url().safeParse(val).success,
     { message: "Must be a valid URL or empty" }
   ),
+  suggestedEventDate: z.string().optional(),
 })
 
 // Support signal schemas

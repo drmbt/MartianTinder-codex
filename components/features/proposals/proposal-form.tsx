@@ -6,15 +6,34 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Badge } from "@/components/ui/badge"
+import { Calendar, Clock, Save } from "lucide-react"
 import type { Channel } from "@prisma/client"
 
 interface ProposalFormProps {
   channels: Channel[]
+  editingProposal?: {
+    id: string
+    title: string
+    note: string
+    channelId: string
+    minCapacity: number | null
+    maxCapacity: number | null
+    threshold: number | null
+    publishAt: Date | null
+    expiresAt: Date | null
+    visibility: string
+    allowAnonymous: boolean
+    moderationMode: string
+    externalChatUrl: string | null
+    suggestedEventDate: string | null
+  }
 }
 
-export function ProposalForm({ channels }: ProposalFormProps) {
+export function ProposalForm({ channels, editingProposal }: ProposalFormProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
+  const [publishMode, setPublishMode] = useState<'draft' | 'now' | 'scheduled'>('now')
   const [formData, setFormData] = useState({
     title: "",
     note: "",
@@ -26,24 +45,52 @@ export function ProposalForm({ channels }: ProposalFormProps) {
     allowAnonymous: false,
     moderationMode: "auto" as const,
     externalChatUrl: "",
+    publishAt: "",
+    expiresAt: "",
+    suggestedEventDate: "", // Your "next Tuesday" example
   })
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent, action: 'draft' | 'publish') => {
     e.preventDefault()
     if (!formData.title || !formData.note || !formData.channelId) return
 
     setIsLoading(true)
     try {
+      const submitData: any = {
+        ...formData,
+        minCapacity: formData.minCapacity ? parseInt(formData.minCapacity) : undefined,
+        maxCapacity: formData.maxCapacity ? parseInt(formData.maxCapacity) : undefined,
+        threshold: formData.threshold ? parseInt(formData.threshold) : undefined,
+        externalChatUrl: formData.externalChatUrl || undefined,
+      }
+
+      // Handle publish/draft logic
+      if (action === 'draft') {
+        // Save as draft - set publishAt to far future
+        submitData.publishAt = new Date('2099-01-01').toISOString()
+      } else if (publishMode === 'now') {
+        // Publish immediately
+        submitData.publishAt = null
+      } else if (publishMode === 'scheduled' && formData.publishAt) {
+        // Scheduled publish
+        submitData.publishAt = new Date(formData.publishAt).toISOString()
+      }
+
+      // Handle expiration
+      if (formData.expiresAt) {
+        submitData.expiresAt = new Date(formData.expiresAt).toISOString()
+      }
+
+      // Add suggested event date as part of description if provided
+      if (formData.suggestedEventDate) {
+        submitData.note += `\n\n📅 Suggested event timing: ${formData.suggestedEventDate}`
+      }
+
       const response = await fetch("/api/proposals", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...formData,
-          minCapacity: formData.minCapacity ? parseInt(formData.minCapacity) : undefined,
-          maxCapacity: formData.maxCapacity ? parseInt(formData.maxCapacity) : undefined,
-          threshold: formData.threshold ? parseInt(formData.threshold) : undefined,
-          externalChatUrl: formData.externalChatUrl || undefined, // Convert empty string to undefined
-        }),
+        credentials: "include",
+        body: JSON.stringify(submitData),
       })
 
       if (response.ok) {
@@ -59,6 +106,11 @@ export function ProposalForm({ channels }: ProposalFormProps) {
     }
   }
 
+  const tomorrow = new Date()
+  tomorrow.setDate(tomorrow.getDate() + 1)
+  const nextWeek = new Date()
+  nextWeek.setDate(nextWeek.getDate() + 7)
+
   return (
     <Card>
       <CardHeader>
@@ -68,7 +120,7 @@ export function ProposalForm({ channels }: ProposalFormProps) {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form className="space-y-6">
           {/* Channel Selection */}
           <div className="space-y-2">
             <Label htmlFor="channelId">Channel</Label>
@@ -112,6 +164,82 @@ export function ProposalForm({ channels }: ProposalFormProps) {
             />
           </div>
 
+          {/* Publishing Options */}
+          <div className="space-y-4">
+            <Label>Publishing Options</Label>
+            <div className="grid grid-cols-3 gap-2">
+              <Button
+                type="button"
+                variant={publishMode === 'now' ? 'default' : 'outline'}
+                onClick={() => setPublishMode('now')}
+                className="flex items-center space-x-1"
+              >
+                <span>Publish Now</span>
+              </Button>
+              <Button
+                type="button"
+                variant={publishMode === 'scheduled' ? 'default' : 'outline'}
+                onClick={() => setPublishMode('scheduled')}
+                className="flex items-center space-x-1"
+              >
+                <Clock className="h-3 w-3" />
+                <span>Schedule</span>
+              </Button>
+              <Button
+                type="button"
+                variant={publishMode === 'draft' ? 'default' : 'outline'}
+                onClick={() => setPublishMode('draft')}
+                className="flex items-center space-x-1"
+              >
+                <Save className="h-3 w-3" />
+                <span>Save Draft</span>
+              </Button>
+            </div>
+
+            {publishMode === 'scheduled' && (
+              <div className="space-y-2">
+                <Label htmlFor="publishAt">Publish Date & Time</Label>
+                <Input
+                  id="publishAt"
+                  type="datetime-local"
+                  value={formData.publishAt}
+                  onChange={(e) => setFormData({ ...formData, publishAt: e.target.value })}
+                  min={new Date().toISOString().slice(0, 16)}
+                />
+              </div>
+            )}
+          </div>
+
+          {/* Timing & Expiration */}
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="expiresAt">Expiration Date (Optional)</Label>
+              <Input
+                id="expiresAt"
+                type="datetime-local"
+                value={formData.expiresAt}
+                onChange={(e) => setFormData({ ...formData, expiresAt: e.target.value })}
+                min={new Date().toISOString().slice(0, 16)}
+              />
+              <p className="text-xs text-gray-500">
+                When should this proposal stop accepting support? Leave empty for no expiration.
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="suggestedEventDate">Suggested Event Timing (Optional)</Label>
+              <Input
+                id="suggestedEventDate"
+                value={formData.suggestedEventDate}
+                onChange={(e) => setFormData({ ...formData, suggestedEventDate: e.target.value })}
+                placeholder="e.g., 'Next Tuesday at 2pm' or 'This weekend'"
+              />
+              <p className="text-xs text-gray-500">
+                When would you like the event to happen if this proposal gets enough support?
+              </p>
+            </div>
+          </div>
+
           {/* Capacity Settings */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
@@ -137,7 +265,7 @@ export function ProposalForm({ channels }: ProposalFormProps) {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="threshold">Threshold</Label>
+              <Label htmlFor="threshold">Support Threshold</Label>
               <Input
                 id="threshold"
                 type="number"
@@ -175,6 +303,7 @@ export function ProposalForm({ channels }: ProposalFormProps) {
             </div>
           </div>
 
+          {/* Action Buttons */}
           <div className="flex space-x-4">
             <Button
               type="button"
@@ -184,14 +313,41 @@ export function ProposalForm({ channels }: ProposalFormProps) {
             >
               Cancel
             </Button>
+            
+            
+            
             <Button
-              type="submit"
+              type="button"
+              onClick={(e) => handleSubmit(e, 'publish')}
               disabled={isLoading || !formData.title || !formData.note || !formData.channelId}
               className="flex-1"
             >
-              {isLoading ? "Creating..." : "Create Proposal"}
+              {isLoading ? "Creating..." : 
+               publishMode === 'draft' ? "Save Draft" :
+               publishMode === 'scheduled' ? "Schedule Proposal" : 
+               "Create & Publish"}
             </Button>
           </div>
+
+          {/* Publishing Preview */}
+          {publishMode !== 'draft' && (
+            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="flex items-center space-x-2 text-sm">
+                <Calendar className="h-4 w-4 text-blue-600" />
+                <span className="font-medium">
+                  {publishMode === 'now' ? 'Will publish immediately' : 
+                   publishMode === 'scheduled' ? `Will publish ${formData.publishAt ? new Date(formData.publishAt).toLocaleString() : 'at selected time'}` :
+                   'Will be saved as draft'}
+                </span>
+              </div>
+              {formData.expiresAt && (
+                <div className="flex items-center space-x-2 text-sm mt-1">
+                  <Clock className="h-4 w-4 text-blue-600" />
+                  <span>Expires {new Date(formData.expiresAt).toLocaleString()}</span>
+                </div>
+              )}
+            </div>
+          )}
         </form>
       </CardContent>
     </Card>
