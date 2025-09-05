@@ -25,16 +25,18 @@ export async function GET(request: NextRequest) {
     // Get user's channels
     const userChannels = await prisma.channelMember.findMany({
       where: { userId: session.user.id },
-      select: { channelId: true }
+      include: { channel: { select: { id: true, name: true } } }
     })
 
     const userChannelIds = userChannels.map(m => m.channelId)
+    const channels = userChannels.map(m => ({ id: m.channel.id, name: m.channel.name }))
 
     if (userChannelIds.length === 0) {
       return NextResponse.json({
         success: true,
         data: {
           proposals: [],
+          channels: [],
           pagination: { page, limit, total: 0, pages: 0 }
         }
       })
@@ -212,6 +214,7 @@ export async function GET(request: NextRequest) {
       success: true,
       data: {
         proposals: proposalsWithStats,
+        channels: channels,
         pagination: {
           page,
           limit,

@@ -1,22 +1,28 @@
-import { auth } from "@/lib/auth"
-import { redirect } from "next/navigation"
+import { ReactNode } from "react"
 import { Navbar } from "./navbar"
+import { BottomNav } from "./bottom-nav"
 
 interface AuthenticatedLayoutProps {
-  children: React.ReactNode
+  children: ReactNode
 }
 
 export async function AuthenticatedLayout({ children }: AuthenticatedLayoutProps) {
-  const session = await auth()
-  
-  if (!session?.user) {
-    redirect("/login")
-  }
-
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
-      <main>{children}</main>
+      {/* Desktop navbar - hidden on mobile */}
+      <div className="hidden md:block">
+        <Navbar />
+      </div>
+      
+      {/* Main content with bottom padding for mobile nav */}
+      <main className="pb-16 md:pb-0">
+        {children}
+      </main>
+      
+      {/* Mobile bottom navigation - hidden on desktop */}
+      <div className="md:hidden">
+        <BottomNav />
+      </div>
     </div>
   )
 } 
