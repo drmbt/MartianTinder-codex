@@ -3,7 +3,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ImageGallery } from "@/components/ui/image-gallery"
+import { NextImageGallery } from "@/components/ui/next-image-gallery"
+import { ThumbnailImage } from "@/components/ui/responsive-image"
 import { User, Mail, Settings, Calendar, Bell, LogOut, Camera } from "lucide-react"
 import { signOut } from "next-auth/react"
 import Link from "next/link"
@@ -37,7 +38,7 @@ export function ProfileSettings({ user }: ProfileSettingsProps) {
           </CardHeader>
           <CardContent>
             <div className="w-full h-64 rounded-lg overflow-hidden">
-              <ImageGallery 
+              <NextImageGallery 
                 images={user.images.map(img => img.url)}
                 alt="Profile photos"
                 className="w-full h-64"
@@ -62,10 +63,11 @@ export function ProfileSettings({ user }: ProfileSettingsProps) {
           <div className="flex items-center gap-4">
             <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center overflow-hidden">
               {user.image ? (
-                <img
+                <ThumbnailImage
                   src={user.image}
                   alt={user.name || "Profile"}
-                  className="w-full h-full object-cover"
+                  className="rounded-full"
+                  size="h-16 w-16"
                 />
               ) : (
                 <User size={24} className="text-primary" />

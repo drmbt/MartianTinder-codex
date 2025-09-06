@@ -3,8 +3,10 @@
 import { useState, useRef, useEffect, useCallback } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "./button"
+import { GalleryImage } from "./responsive-image"
+import Image from "next/image"
 
-interface ImageGalleryProps {
+interface NextImageGalleryProps {
   images: string[]
   alt?: string
   className?: string
@@ -13,17 +15,15 @@ interface ImageGalleryProps {
   autoHeight?: boolean
 }
 
-export function ImageGallery({ 
+export function NextImageGallery({ 
   images, 
   alt = "Gallery image", 
   className = "",
   showControls = true,
   showDots = true,
   autoHeight = false
-}: ImageGalleryProps) {
+}: NextImageGalleryProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
-  const [isLoading, setIsLoading] = useState(true)
-  const imageRef = useRef<HTMLImageElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
   // Handle touch events for mobile
@@ -62,8 +62,8 @@ export function ImageGallery({
 
   if (!images || images.length === 0) {
     return (
-      <div className={`bg-gray-100 flex items-center justify-center ${className}`}>
-        <div className="text-gray-400 text-4xl">📷</div>
+      <div className={`bg-gray-100 dark:bg-gray-800 flex items-center justify-center min-h-[200px] ${className}`}>
+        <div className="text-gray-400 dark:text-gray-500 text-4xl">📷</div>
       </div>
     )
   }
@@ -112,7 +112,7 @@ export function ImageGallery({
   return (
     <div 
       ref={containerRef}
-      className={`relative overflow-hidden rounded-lg bg-gray-100 min-h-[200px] max-w-full ${className}`}
+      className={`relative overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800 min-h-[200px] max-w-full ${className}`}
       onClick={handleImageClick}
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
@@ -120,23 +120,17 @@ export function ImageGallery({
     >
       {/* Main image */}
       <div className="relative">
-        <img
-          ref={imageRef}
-          src={images[currentIndex]}
-          alt={`${alt} ${currentIndex + 1}`}
-          className={`w-full transition-opacity duration-300 ${
-            isLoading ? 'opacity-0' : 'opacity-100'
-          } ${autoHeight ? 'h-auto object-contain max-h-none' : 'h-full max-h-full object-cover'}`}
-          onLoad={() => setIsLoading(false)}
-          onError={() => setIsLoading(false)}
-        />
-        
-        {/* Loading placeholder */}
-        {isLoading && (
-          <div className="absolute inset-0 bg-muted animate-pulse flex items-center justify-center">
-            <div className="text-muted-foreground text-2xl">📷</div>
-          </div>
-        )}
+
+        <div className="relative w-full aspect-[4/5]">
+          <Image
+            src={images[currentIndex]}
+            alt={`${alt} ${currentIndex + 1}`}
+            fill
+            className="object-cover object-top"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
+            priority={currentIndex === 0}
+          />
+        </div>
 
         {/* Image counter */}
         {images.length > 1 && (
@@ -152,7 +146,7 @@ export function ImageGallery({
           <Button
             variant="ghost"
             size="sm"
-            className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+            className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/20 hover:bg-black/40 text-white border-none h-8 w-8 p-0 opacity-0 hover:opacity-100 transition-opacity duration-200 hidden sm:flex"
             onClick={(e) => {
               e.stopPropagation()
               goToPrevious()
@@ -163,7 +157,7 @@ export function ImageGallery({
           <Button
             variant="ghost"
             size="sm"
-            className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+            className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/20 hover:bg-black/40 text-white border-none h-8 w-8 p-0 opacity-0 hover:opacity-100 transition-opacity duration-200 hidden sm:flex"
             onClick={(e) => {
               e.stopPropagation()
               goToNext()
@@ -178,28 +172,21 @@ export function ImageGallery({
       {images.length > 1 && showDots && (
         <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex space-x-1">
           {images.map((_, index) => (
-            <Button
+            <button
               key={index}
-              className={`w-2 h-2 rounded-full transition-all ${
-                index === currentIndex
-                  ? 'bg-white'
+              className={`w-2 h-2 rounded-full transition-colors ${
+                index === currentIndex 
+                  ? 'bg-white' 
                   : 'bg-white/50 hover:bg-white/75'
               }`}
               onClick={(e) => {
                 e.stopPropagation()
                 goToSlide(index)
               }}
+              aria-label={`Go to image ${index + 1}`}
             />
           ))}
         </div>
-      )}
-
-      {/* Touch zones for mobile (invisible) */}
-      {images.length > 1 && (
-        <>
-          <div className="absolute left-0 top-0 w-1/2 h-full md:hidden" />
-          <div className="absolute right-0 top-0 w-1/2 h-full md:hidden" />
-        </>
       )}
     </div>
   )

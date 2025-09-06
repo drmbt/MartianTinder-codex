@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { ImageGallery } from "@/components/ui/image-gallery"
+import { NextImageGallery } from "@/components/ui/next-image-gallery"
 import Link from "next/link"
 
 interface ProposalData {
@@ -47,7 +47,7 @@ export function SwipeCard({ proposal, isAnimating = false, className = "" }: Swi
       {/* Image Gallery */}
       {(proposal.images?.length || proposal.imageUrl) && (
         <div className="relative w-full">
-          <ImageGallery 
+          <NextImageGallery 
             images={
               proposal.images && proposal.images.length > 0 
                 ? proposal.images.sort((a, b) => a.order - b.order).map(img => img.url)

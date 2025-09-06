@@ -3,6 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Heart, Star, ThumbsDown, User, Calendar, MessageCircle } from "lucide-react"
+import { ThumbnailImage } from "./responsive-image"
 import Link from "next/link"
 
 interface ProposalCardProps {
@@ -69,10 +70,11 @@ export function ProposalCard({
             {/* Thumbnail - responsive sizing */}
             {hasImage && (
               <div className="relative w-full h-32 sm:w-32 sm:h-32 flex-shrink-0">
-                <img
+                <ThumbnailImage
                   src={firstImage || ''}
                   alt={proposal.title}
-                  className="w-full h-full object-cover"
+                  className="w-full h-32 sm:h-32"
+                  size="h-32"
                 />
                 {proposal.images && proposal.images.length > 1 && (
                   <div className="absolute top-2 right-2 bg-black/60 text-white text-xs px-1.5 py-0.5 rounded">
@@ -199,13 +201,12 @@ export function ProposalCard({
           <div className="flex items-center p-3 gap-3">
             {/* Mini thumbnail */}
             {hasImage && (
-              <div className="relative w-12 h-12 flex-shrink-0 rounded overflow-hidden">
-                <img
-                  src={firstImage || ''}
-                  alt={proposal.title}
-                  className="w-full h-full object-cover"
-                />
-              </div>
+              <ThumbnailImage
+                src={firstImage || ''}
+                alt={proposal.title}
+                className="flex-shrink-0 rounded overflow-hidden"
+                size="h-12 w-12"
+              />
             )}
             
             {/* Content */}

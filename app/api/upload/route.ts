@@ -34,8 +34,6 @@ export async function POST(request: NextRequest) {
         results.push({
           fileName: result.fileName,
           url: result.url,
-          thumbUrl: result.thumbUrl,
-          largeUrl: result.largeUrl,
           originalName: file.name,
           size: file.size,
           type: file.type

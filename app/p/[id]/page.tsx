@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Calendar, Users, MessageSquare, ExternalLink } from "lucide-react"
 import { SupportButtons } from "@/components/features/proposals/support-buttons"
 import { ProposalActions } from "@/components/features/proposals/proposal-actions"
-import { ImageGallery } from "@/components/ui/image-gallery"
+import { NextImageGallery } from "@/components/ui/next-image-gallery"
 import { SupportType, SupportVisibility } from "@/types"
 import Link from "next/link"
 
@@ -154,7 +154,7 @@ export default async function ProposalPage({ params }: ProposalPageProps) {
               {(proposal.images?.length > 0 || proposal.imageUrl) && (
                 <Card>
                   <CardContent className="p-0">
-                    <ImageGallery 
+                    <NextImageGallery 
                       images={
                         proposal.images && proposal.images.length > 0 
                           ? proposal.images.map((img) => img.url)

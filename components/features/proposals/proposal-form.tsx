@@ -1,12 +1,12 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { ImageUpload } from "@/components/ui/image-upload"
+import { EnhancedImageUpload } from "@/components/ui/enhanced-image-upload"
 import { Calendar, Clock, Save } from "lucide-react"
 import { createProposalSchema } from "@/lib/validations"
 // Channel type definition
@@ -44,7 +44,21 @@ export function ProposalForm({ channels, editingProposal }: ProposalFormProps) {
   const [uploadedImages, setUploadedImages] = useState<Array<{url: string, fileName: string}>>(
     editingProposal?.images?.map(img => ({ url: img.url, fileName: img.url.split('/').pop() || '' })) || []
   )
+  
+
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [isClient, setIsClient] = useState(false)
+  
+  // Fix hydration mismatch by only calculating min date on client
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
+  
+  const minDateTime = useMemo(() => {
+    if (!isClient) return "" // Return empty string on server
+    return new Date().toISOString().slice(0, 16)
+  }, [isClient])
+  
   const [formData, setFormData] = useState({
     title: editingProposal?.title || "",
     note: editingProposal?.note || "",
@@ -215,14 +229,28 @@ export function ProposalForm({ channels, editingProposal }: ProposalFormProps) {
           {/* Image Upload */}
           <div className="space-y-2">
             <Label>Images</Label>
-            <ImageUpload
+            <EnhancedImageUpload
               onUpload={(files) => {
-                setUploadedImages(prev => [...prev, ...files.map(f => ({ url: f.url, fileName: f.fileName }))])
+                console.log('ProposalForm onUpload:', files)
+                const newImages = files.map(f => ({ url: f.url, fileName: f.fileName }))
+                console.log('Mapped to uploadedImages format:', newImages)
+                setUploadedImages(prev => {
+                  const updated = [...prev, ...newImages]
+                  console.log('Updated uploadedImages state:', updated)
+                  return updated
+                })
               }}
               onRemove={(fileName) => {
-                setUploadedImages(prev => prev.filter(img => img.fileName !== fileName))
+                console.log('ProposalForm onRemove called with:', fileName)
+                setUploadedImages(prev => {
+                  console.log('Current uploadedImages before removal:', prev)
+                  const filtered = prev.filter(img => img.fileName !== fileName)
+                  console.log('After filtering:', filtered)
+                  return filtered
+                })
               }}
-              existingImages={uploadedImages.map(img => img.url)}
+              existingImages={editingProposal?.images?.map(img => img.url) || []}
+              uploadedImages={uploadedImages.map(img => img.url)}
               subDir="proposals"
               maxFiles={5}
               disabled={isLoading}
@@ -269,7 +297,7 @@ export function ProposalForm({ channels, editingProposal }: ProposalFormProps) {
                   type="datetime-local"
                   value={formData.publishAt}
                   onChange={(e) => setFormData({ ...formData, publishAt: e.target.value })}
-                  min={new Date().toISOString().slice(0, 16)}
+                  min={minDateTime}
                 />
               </div>
             )}
@@ -284,7 +312,7 @@ export function ProposalForm({ channels, editingProposal }: ProposalFormProps) {
                 type="datetime-local"
                 value={formData.expiresAt}
                 onChange={(e) => setFormData({ ...formData, expiresAt: e.target.value })}
-                min={new Date().toISOString().slice(0, 16)}
+                min={minDateTime}
               />
               <p className="text-xs text-gray-500">
                 When should this proposal stop accepting support? Leave empty for no expiration.

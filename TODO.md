@@ -2,9 +2,47 @@
 
 **Project**: MartianTinder MVP  
 **Current Sprint**: Sprint 5 (Mobile UX Polish & Advanced Features)  
-**Last Updated**: Media Upload Infrastructure Complete - Image Display Integration Needed
+**Last Updated**: Image System Refactor - Gallery Aspect Ratio & Mobile UX Polish Needed
 
 ---
+
+## ✅ Recently Completed (Current Session)
+
+- [x] **Image Upload System Refactor**
+  - [x] Eliminated duplicate thumbnail generation (now single 2048px WebP only)
+  - [x] Replaced old ImageGallery with NextImageGallery using Next.js Image
+  - [x] Fixed hydration mismatch errors in proposal forms
+  - [x] Implemented controlled image upload component architecture
+  - [x] Added always-visible remove buttons for mobile UX
+  - [x] Created full-screen image viewer with click-to-expand
+  - [x] Converted all image displays to use Next.js Image optimization
+  - [x] Fixed state management conflicts between parent/child components
+
+## 🎯 Current Priority Issues
+
+- [ ] **Image Gallery Aspect Ratio Fixes**
+  - [ ] Fix main gallery carousel to display 4:5 aspect ratio (currently wider)
+  - [ ] Ensure thumbnails remain 1:1 square with center cropping
+  - [ ] Test gallery navigation and touch interactions on mobile
+  - [ ] Verify Next.js Image optimization working correctly
+
+- [ ] **Mobile Feed Navigation Issues**
+  - [ ] Fix proposal navigation feed not being navigable on mobile
+  - [ ] Implement proper touch/swipe gestures for feed cards
+  - [ ] Optimize mobile touch targets and interaction zones
+  - [ ] Test feed scrolling and card interactions on various mobile devices
+
+- [ ] **Proposal Creation Form UX Refactor** (Needs Definition)
+  - [ ] Define specific UI improvements needed for proposal creation
+  - [ ] Identify mobile UX pain points in current form
+  - [ ] Plan form field organization and validation UX
+  - [ ] Design mobile-first form layout and interactions
+  - [ ] Consider multi-step form approach for complex proposals
+
+---
+
+## 🔄 Sprint 5 Continuation
+
 - [ ] **Enhanced Calendar Integration**
   - [ ] Implement Google Calendar channel creation strategy
   - [ ] Build dual calendar system (channel + personal)
@@ -32,14 +70,14 @@
   - [ ] Real-time search suggestions and autocomplete
 
 - [ ] **Media & Content Features**
-  - [ ] Add basic image crop/fit functionality
+  - [x] ~~Add basic image crop/fit functionality~~ (Completed - using Next.js Image)
   - [ ] External chat link integration and display
   - [ ] Rich text formatting for proposal descriptions
   - [ ] Emoji reactions and status indicators
 
 - [ ] **Performance & Optimization**
   - [ ] Implement virtual scrolling for large lists
-  - [ ] Add image lazy loading and optimization
+  - [x] ~~Add image lazy loading and optimization~~ (Completed - Next.js Image handles this)
   - [ ] Optimize API response caching
   - [ ] Performance monitoring and error tracking
   - [ ] Bundle size optimization

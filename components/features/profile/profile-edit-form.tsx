@@ -6,8 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { ImageUpload } from "@/components/ui/image-upload"
-import { ImageGallery } from "@/components/ui/image-gallery"
+import { EnhancedImageUpload } from "@/components/ui/enhanced-image-upload"
+import { NextImageGallery } from "@/components/ui/next-image-gallery"
 import { User, Save, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 
@@ -83,7 +83,7 @@ export function ProfileEditForm({ user }: ProfileEditFormProps) {
             <div className="space-y-2">
               <Label>Current Photos</Label>
               <div className="w-full h-64 rounded-lg overflow-hidden">
-                <ImageGallery 
+                <NextImageGallery 
                   images={allImages}
                   alt="Profile photos"
                   className="w-full h-64"
@@ -111,7 +111,7 @@ export function ProfileEditForm({ user }: ProfileEditFormProps) {
           {/* Image Upload */}
           <div className="space-y-2">
             <Label>Upload New Photos</Label>
-            <ImageUpload
+            <EnhancedImageUpload
               onUpload={(files) => {
                 setUploadedImages(prev => [...prev, ...files.map(f => ({ url: f.url, fileName: f.fileName }))])
                 // Set first image as primary if none selected

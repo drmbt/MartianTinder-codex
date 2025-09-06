@@ -159,3 +159,7 @@
 - Follow the established patterns in existing code
 - Ask specific questions rather than making assumptions
 - Prioritize MVP functionality over advanced features 
+
+YOU MUST run `npx tsc --noEmit` after significant chunks of work to check for typescript errors and subsequently fix them.
+YOU MUST run `npm run lint` once you have a stable base without ts errors.
+DO NOT RUN `build`, `npm run build`, etc unprompted. the dev server is already running and compile time errors are caught by the above.

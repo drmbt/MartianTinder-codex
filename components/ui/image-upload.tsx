@@ -3,13 +3,12 @@
 import { useState, useRef, useCallback } from "react"
 import { Upload, X, Loader2 } from "lucide-react"
 import { Button } from "./button"
-import { ImageGallery } from "./image-gallery"
+import { NextImageGallery } from "./next-image-gallery"
+import { ThumbnailImage } from "./responsive-image"
 
 interface UploadedFile {
   fileName: string
   url: string
-  thumbUrl?: string
-  largeUrl?: string
   originalName: string
   size: number
   type: string
@@ -128,7 +127,7 @@ export function ImageUpload({
       {/* Image Gallery Preview */}
       {allImages.length > 0 && (
         <div className="relative group">
-          <ImageGallery 
+          <NextImageGallery 
             images={allImages}
             className="w-full h-64"
             alt="Uploaded images"
@@ -194,10 +193,11 @@ export function ImageUpload({
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             {uploadedFiles.map((file) => (
               <div key={file.fileName} className="relative group">
-                <img
-                  src={file.thumbUrl || file.url}
+                <ThumbnailImage
+                  src={file.url}
                   alt={file.originalName}
-                  className="w-full h-20 object-cover rounded-lg"
+                  className="rounded-lg"
+                  size="h-20"
                 />
                 <Button
                   variant="destructive"

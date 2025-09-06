@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { ImageGallery } from "@/components/ui/image-gallery"
+import { NextImageGallery } from "@/components/ui/next-image-gallery"
 import { ArrowLeft, ArrowRight, ArrowUp, ArrowDown } from "lucide-react"
 import Link from "next/link"
 
@@ -302,7 +302,7 @@ export function TinderFeed({ proposals }: TinderFeedProps) {
         {/* Image Gallery */}
         {(currentProposal.images?.length || currentProposal.imageUrl) && (
           <div className="relative w-full">
-            <ImageGallery 
+            <NextImageGallery 
               images={
                 currentProposal.images && currentProposal.images.length > 0 
                   ? currentProposal.images.sort((a, b) => a.order - b.order).map(img => img.url)

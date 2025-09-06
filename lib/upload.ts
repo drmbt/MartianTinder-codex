@@ -10,14 +10,11 @@ export const UPLOAD_CONFIG = {
   allowedExtensions: ['.jpg', '.jpeg', '.png', '.webp', '.gif'],
   uploadDir: join(process.cwd(), 'public/uploads'),
   maxImagesPerUpload: 5,
-  // Image optimization settings
+  // Image optimization settings - single version only
   optimization: {
-    // Main display image (for cards, galleries)
-    main: { width: 800, height: 600, quality: 80 },
-    // Thumbnail for lists and previews
-    thumb: { width: 300, height: 200, quality: 70 },
-    // Large for full-screen viewing
-    large: { width: 1200, height: 900, quality: 85 }
+    // Single optimized version with max 2048px on longest side
+    maxDimension: 2048,
+    quality: 85
   }
 } as const
 
@@ -25,8 +22,6 @@ export interface UploadResult {
   success: boolean
   fileName?: string
   url?: string
-  thumbUrl?: string
-  largeUrl?: string
   error?: string
 }
 
@@ -74,52 +69,39 @@ export function generateFileName(originalName: string): string {
   return `${timestamp}-${uuid}${extension}`
 }
 
-// Optimize image and create multiple sizes
-async function optimizeImage(buffer: Buffer, baseName: string, uploadPath: string): Promise<{
-  main: string
-  thumb: string
-  large: string
-}> {
+// Optimize image to single version with max 2048px dimension
+async function optimizeImage(buffer: Buffer, baseName: string, uploadPath: string): Promise<string> {
   const nameWithoutExt = baseName.replace(/\.[^/.]+$/, "")
-  
-  // Create main optimized image
-  const mainFileName = `${nameWithoutExt}.webp`
-  const mainPath = join(uploadPath, mainFileName)
-  await sharp(buffer)
-    .resize(UPLOAD_CONFIG.optimization.main.width, UPLOAD_CONFIG.optimization.main.height, {
-      fit: 'inside',
-      withoutEnlargement: true
-    })
-    .webp({ quality: UPLOAD_CONFIG.optimization.main.quality })
-    .toFile(mainPath)
+  const fileName = `${nameWithoutExt}.webp`
+  const filePath = join(uploadPath, fileName)
 
-  // Create thumbnail
-  const thumbFileName = `${nameWithoutExt}_thumb.webp`
-  const thumbPath = join(uploadPath, thumbFileName)
-  await sharp(buffer)
-    .resize(UPLOAD_CONFIG.optimization.thumb.width, UPLOAD_CONFIG.optimization.thumb.height, {
-      fit: 'cover',
-      position: 'center'
-    })
-    .webp({ quality: UPLOAD_CONFIG.optimization.thumb.quality })
-    .toFile(thumbPath)
+  // Get image metadata to determine dimensions
+  const metadata = await sharp(buffer).metadata()
+  const { width = 0, height = 0 } = metadata
 
-  // Create large version
-  const largeFileName = `${nameWithoutExt}_large.webp`
-  const largePath = join(uploadPath, largeFileName)
-  await sharp(buffer)
-    .resize(UPLOAD_CONFIG.optimization.large.width, UPLOAD_CONFIG.optimization.large.height, {
-      fit: 'inside',
-      withoutEnlargement: true
-    })
-    .webp({ quality: UPLOAD_CONFIG.optimization.large.quality })
-    .toFile(largePath)
+  // Calculate resize dimensions maintaining aspect ratio
+  // Resize only if larger than maxDimension
+  let resizeWidth: number | undefined
+  let resizeHeight: number | undefined
 
-  return {
-    main: mainFileName,
-    thumb: thumbFileName,
-    large: largeFileName
+  if (width > UPLOAD_CONFIG.optimization.maxDimension || height > UPLOAD_CONFIG.optimization.maxDimension) {
+    if (width > height) {
+      resizeWidth = UPLOAD_CONFIG.optimization.maxDimension
+    } else {
+      resizeHeight = UPLOAD_CONFIG.optimization.maxDimension
+    }
   }
+
+  // Process and save the image
+  await sharp(buffer)
+    .resize(resizeWidth, resizeHeight, {
+      fit: 'inside',
+      withoutEnlargement: true
+    })
+    .webp({ quality: UPLOAD_CONFIG.optimization.quality })
+    .toFile(filePath)
+
+  return fileName
 }
 
 // Save file to uploads directory
@@ -145,18 +127,16 @@ export async function saveFile(file: File, subDir: string = ''): Promise<UploadR
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
 
-    // Optimize and create multiple sizes
-    const optimizedFiles = await optimizeImage(buffer, fileName, uploadPath)
+    // Optimize image to single version
+    const optimizedFileName = await optimizeImage(buffer, fileName, uploadPath)
 
-    // Return success with URLs
+    // Return success with URL
     const baseUrl = subDir ? `/uploads/${subDir}` : `/uploads`
 
     return {
       success: true,
-      fileName: optimizedFiles.main,
-      url: `${baseUrl}/${optimizedFiles.main}`,
-      thumbUrl: `${baseUrl}/${optimizedFiles.thumb}`,
-      largeUrl: `${baseUrl}/${optimizedFiles.large}`
+      fileName: optimizedFileName,
+      url: `${baseUrl}/${optimizedFileName}`
     }
   } catch (error) {
     console.error('File upload error:', error)
