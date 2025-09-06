@@ -50,7 +50,17 @@ export function CalendarView({ proposals, events }: CalendarViewProps) {
   const monthDays = eachDayOfInterval({ start: monthStart, end: monthEnd })
 
   const getItemsForDate = (date: Date) => {
-    const dateItems = []
+    const dateItems: Array<{
+      type: 'proposal' | 'event'
+      id: string
+      title: string
+      time: string
+      channel?: string
+      isReified?: boolean
+      supportCount?: number
+      threshold?: number | null
+      isConfirmed?: boolean
+    }> = []
 
     // Add proposals with suggested event dates
     proposals.forEach(proposal => {

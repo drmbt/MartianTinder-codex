@@ -98,10 +98,10 @@ export function ChannelFeedClient({ proposals, channelId }: ChannelFeedClientPro
               <CardContent>
                 <p className="text-gray-600 line-clamp-2">{proposal.note}</p>
                 <div className="flex items-center justify-between mt-3 text-sm text-gray-500">
-                  <span>{new Date(proposal.createdAt).toLocaleDateString()}</span>
+                  <span>{new Date(proposal.createdAt).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })}</span>
                   {proposal.expiresAt && (
                     <span>
-                      Expires {new Date(proposal.expiresAt).toLocaleDateString()}
+                      Expires {new Date(proposal.expiresAt).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })}
                     </span>
                   )}
                 </div>

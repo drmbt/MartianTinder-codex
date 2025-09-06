@@ -135,11 +135,11 @@ export function SupportButtons({
     <div className="space-y-4">
       {/* Threshold Met Alert */}
       {thresholdMet && (
-        <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+        <div className="p-4 status-success border-success rounded-lg">
           <div className="flex items-center space-x-2">
-            <div className="text-green-600 font-semibold">🎉 Threshold Met!</div>
+            <div className="font-semibold">🎉 Threshold Met!</div>
           </div>
-          <p className="text-sm text-green-700 mt-1">
+          <p className="text-sm mt-1">
             This proposal has enough support to become an event.
           </p>
         </div>
@@ -151,16 +151,16 @@ export function SupportButtons({
           <span>Support Progress</span>
           <span>{totalSupport} / {threshold || "∞"}</span>
         </div>
-        <div className="w-full bg-gray-200 rounded-full h-3">
+        <div className="w-full progress-bar h-3">
           <div 
             className={`h-3 rounded-full transition-all duration-500 ${
-              thresholdMet ? 'bg-green-500' : 'bg-green-600'
+              thresholdMet ? 'progress-fill-success' : 'bg-primary'
             }`}
             style={{ width: `${progressPercent}%` }}
           />
           {threshold > 0 && (
             <div 
-              className="absolute w-0.5 h-3 bg-gray-400 rounded"
+              className="absolute w-0.5 h-3 bg-muted-foreground rounded"
               style={{ left: `${Math.min(100, (threshold / (threshold * 1.5)) * 100)}%` }}
             />
           )}
@@ -170,27 +170,27 @@ export function SupportButtons({
       {/* Support Stats */}
       <div className="grid grid-cols-3 gap-2 text-center">
         <div className="space-y-1">
-          <div className="text-2xl font-bold text-green-600">{optimisticStats.supports}</div>
-          <div className="text-xs text-gray-500">Support</div>
+          <div className="text-2xl font-bold text-green-600 dark:text-green-400">{optimisticStats.supports}</div>
+          <div className="text-xs text-muted-foreground">Support</div>
         </div>
         <div className="space-y-1">
-          <div className="text-2xl font-bold text-blue-600">{optimisticStats.supersupports}</div>
-          <div className="text-xs text-gray-500">Super</div>
+          <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{optimisticStats.supersupports}</div>
+          <div className="text-xs text-muted-foreground">Super</div>
         </div>
         <div className="space-y-1">
-          <div className="text-2xl font-bold text-red-600">{optimisticStats.opposes}</div>
-          <div className="text-xs text-gray-500">Oppose</div>
+          <div className="text-2xl font-bold text-red-600 dark:text-red-400">{optimisticStats.opposes}</div>
+          <div className="text-xs text-muted-foreground">Oppose</div>
         </div>
       </div>
 
       {/* Current Signal Display */}
       {currentSignal && (
-        <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center justify-between">
+        <div className="p-3 status-info border-info rounded-lg flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <Badge variant="outline">
               Your signal: <span className="font-medium capitalize ml-1">{currentSignal.type}</span>
               {currentSignal.visibility !== 'public' && (
-                <span className="text-gray-500"> ({currentSignal.visibility})</span>
+                <span className="text-muted-foreground"> ({currentSignal.visibility})</span>
               )}
             </Badge>
           </div>
@@ -209,7 +209,7 @@ export function SupportButtons({
              {/* Support Actions */}
        <div className="space-y-2">
          <Button 
-           className="w-full flex items-center justify-center space-x-2 bg-green-600 hover:bg-green-700 text-white"
+           className="w-full flex items-center justify-center space-x-2 bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-600 text-white"
            onClick={() => handleSignal('support')}
            disabled={isPending}
            variant={currentSignal?.type === 'support' ? 'default' : 'outline'}
@@ -219,7 +219,7 @@ export function SupportButtons({
          </Button>
          
          <Button 
-           className="w-full flex items-center justify-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white"
+           className="w-full flex items-center justify-center space-x-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 text-white"
            onClick={() => handleSignal('supersupport')}
            disabled={isPending}
            variant={currentSignal?.type === 'supersupport' ? 'default' : 'outline'}
@@ -230,7 +230,7 @@ export function SupportButtons({
          
          <Button 
            variant="outline" 
-           className="w-full text-red-600 border-red-300 hover:bg-red-50 flex items-center justify-center space-x-2"
+           className="w-full text-red-600 dark:text-red-400 border-red-300 dark:border-red-800 hover-error flex items-center justify-center space-x-2"
            onClick={() => handleSignal('oppose')}
            disabled={isPending}
          >
@@ -241,7 +241,7 @@ export function SupportButtons({
          {/* Swipe Left / Dismiss Button */}
          <Button 
            variant="outline" 
-           className="w-full text-gray-600 border-gray-300 hover:bg-gray-50 flex items-center justify-center space-x-2"
+           className="w-full text-muted-foreground border-muted hover:bg-muted flex items-center justify-center space-x-2"
            onClick={() => handleUserState('dismissed')}
            disabled={isPending}
          >

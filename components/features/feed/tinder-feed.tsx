@@ -166,9 +166,9 @@ export function TinderFeed({ proposals }: TinderFeedProps) {
         <div className="text-sm text-gray-500 mb-2">
           {currentIndex + 1} of {proposals.length} • {remainingCount - 1} remaining
         </div>
-        <div className="w-full bg-gray-200 rounded-full h-1">
+        <div className="w-full progress-bar h-1">
           <div 
-            className="bg-orange-500 h-1 rounded-full transition-all duration-300"
+            className="progress-fill h-1 rounded-full transition-all duration-300"
             style={{ width: `${((currentIndex + 1) / proposals.length) * 100}%` }}
           />
         </div>
@@ -206,35 +206,35 @@ export function TinderFeed({ proposals }: TinderFeedProps) {
 
           {/* Suggested Event Date */}
           {currentProposal.suggestedEventDate && (
-            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="p-3 status-info border-info rounded-lg">
               <div className="text-sm">
-                <span className="font-medium text-blue-800">📅 Suggested timing:</span>
-                <span className="text-blue-700 ml-1">{currentProposal.suggestedEventDate}</span>
+                <span className="font-medium">📅 Suggested timing:</span>
+                <span className="ml-1">{currentProposal.suggestedEventDate}</span>
               </div>
             </div>
           )}
 
           {/* Support Stats */}
-          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-            <div className="text-sm text-gray-600">
+          <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+            <div className="text-sm text-muted-foreground">
               <span className="font-medium">Support:</span> {totalSupport}
               {threshold > 0 && <span> / {threshold} needed</span>}
             </div>
             <div className="flex items-center space-x-3 text-sm">
-              <span className="text-green-600">💚 {currentProposal.supportStats.supports}</span>
-              <span className="text-blue-600">⭐ {currentProposal.supportStats.supersupports}</span>
-              <span className="text-red-600">👎 {currentProposal.supportStats.opposes}</span>
+              <span className="text-green-600 dark:text-green-400">💚 {currentProposal.supportStats.supports}</span>
+              <span className="text-blue-600 dark:text-blue-400">⭐ {currentProposal.supportStats.supersupports}</span>
+              <span className="text-red-600 dark:text-red-400">👎 {currentProposal.supportStats.opposes}</span>
             </div>
           </div>
 
           {/* External Chat */}
           {currentProposal.externalChatUrl && (
-            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="p-3 status-info border-info rounded-lg">
               <a 
                 href={currentProposal.externalChatUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                className="text-sm font-medium hover:underline"
               >
                 💬 Join Discussion →
               </a>
@@ -244,7 +244,7 @@ export function TinderFeed({ proposals }: TinderFeedProps) {
           {/* Expiration */}
           {currentProposal.expiresAt && (
             <div className="text-xs text-gray-500 text-center">
-              Expires {new Date(currentProposal.expiresAt).toLocaleString()}
+              Expires {new Date(currentProposal.expiresAt).toLocaleString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
             </div>
           )}
         </CardContent>
@@ -258,7 +258,7 @@ export function TinderFeed({ proposals }: TinderFeedProps) {
             onClick={() => handleAction('dismiss')}
             disabled={isAnimating}
             variant="outline"
-            className="aspect-square p-0 border-gray-300 hover:bg-gray-50"
+            className="aspect-square p-0 border-muted hover:bg-muted"
           >
             <div className="flex flex-col items-center space-y-1">
               <ArrowLeft className="h-5 w-5 text-gray-600" />
@@ -270,7 +270,7 @@ export function TinderFeed({ proposals }: TinderFeedProps) {
             onClick={() => handleAction('oppose')}
             disabled={isAnimating}
             variant="outline"
-            className="aspect-square p-0 border-red-300 hover:bg-red-50"
+            className="aspect-square p-0 border-red-300 dark:border-red-800 hover-error"
           >
             <div className="flex flex-col items-center space-y-1">
               <ArrowDown className="h-5 w-5 text-red-600" />
@@ -282,7 +282,7 @@ export function TinderFeed({ proposals }: TinderFeedProps) {
             onClick={() => handleAction('support')}
             disabled={isAnimating}
             variant="outline"
-            className="aspect-square p-0 border-green-300 hover:bg-green-50"
+            className="aspect-square p-0 border-green-300 dark:border-green-800 hover-success"
           >
             <div className="flex flex-col items-center space-y-1">
               <ArrowRight className="h-5 w-5 text-green-600" />
@@ -294,7 +294,7 @@ export function TinderFeed({ proposals }: TinderFeedProps) {
             onClick={() => handleAction('supersupport')}
             disabled={isAnimating}
             variant="outline"
-            className="aspect-square p-0 border-blue-300 hover:bg-blue-50"
+            className="aspect-square p-0 border-blue-300 dark:border-blue-800 hover-info"
           >
             <div className="flex flex-col items-center space-y-1">
               <ArrowUp className="h-5 w-5 text-blue-600" />

@@ -112,11 +112,7 @@ export function ImageGallery({
   return (
     <div 
       ref={containerRef}
-      className={`relative overflow-hidden rounded-lg bg-gray-100 ${className}`}
-      style={{ 
-        minHeight: '200px',
-        maxWidth: '100%'
-      }}
+      className={`relative overflow-hidden rounded-lg bg-gray-100 min-h-[200px] max-w-full ${className}`}
       onClick={handleImageClick}
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
@@ -130,25 +126,21 @@ export function ImageGallery({
           alt={`${alt} ${currentIndex + 1}`}
           className={`w-full transition-opacity duration-300 ${
             isLoading ? 'opacity-0' : 'opacity-100'
-          } ${autoHeight ? 'h-auto object-contain' : 'h-full object-cover'}`}
-          style={{
-            maxHeight: autoHeight ? 'none' : '100%',
-            objectFit: autoHeight ? 'contain' : 'cover'
-          }}
+          } ${autoHeight ? 'h-auto object-contain max-h-none' : 'h-full max-h-full object-cover'}`}
           onLoad={() => setIsLoading(false)}
           onError={() => setIsLoading(false)}
         />
         
         {/* Loading placeholder */}
         {isLoading && (
-          <div className="absolute inset-0 bg-gray-200 animate-pulse flex items-center justify-center">
-            <div className="text-gray-400 text-2xl">📷</div>
+          <div className="absolute inset-0 bg-muted animate-pulse flex items-center justify-center">
+            <div className="text-muted-foreground text-2xl">📷</div>
           </div>
         )}
 
         {/* Image counter */}
         {images.length > 1 && (
-          <div className="absolute top-2 right-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
+          <div className="absolute top-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded">
             {currentIndex + 1} / {images.length}
           </div>
         )}
@@ -160,7 +152,7 @@ export function ImageGallery({
           <Button
             variant="ghost"
             size="sm"
-            className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-70 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+            className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white opacity-0 group-hover:opacity-100 transition-opacity"
             onClick={(e) => {
               e.stopPropagation()
               goToPrevious()
@@ -171,7 +163,7 @@ export function ImageGallery({
           <Button
             variant="ghost"
             size="sm"
-            className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-70 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+            className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white opacity-0 group-hover:opacity-100 transition-opacity"
             onClick={(e) => {
               e.stopPropagation()
               goToNext()
@@ -184,14 +176,14 @@ export function ImageGallery({
 
       {/* Dots indicator */}
       {images.length > 1 && showDots && (
-        <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-1">
+        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex space-x-1">
           {images.map((_, index) => (
             <button
               key={index}
               className={`w-2 h-2 rounded-full transition-all ${
                 index === currentIndex
                   ? 'bg-white'
-                  : 'bg-white bg-opacity-50 hover:bg-opacity-75'
+                  : 'bg-white/50 hover:bg-white/75'
               }`}
               onClick={(e) => {
                 e.stopPropagation()

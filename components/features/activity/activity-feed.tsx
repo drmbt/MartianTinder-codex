@@ -79,19 +79,19 @@ type ActivityItem = {
 const getActionIcon = (type: string) => {
   switch (type) {
     case 'support':
-      return <Heart size={16} className="text-green-600" />
+      return <Heart size={16} className="text-green-600 dark:text-green-400" />
     case 'supersupport':
-      return <Star size={16} className="text-yellow-500" />
+      return <Star size={16} className="text-yellow-500 dark:text-yellow-400" />
     case 'oppose':
-      return <ThumbsDown size={16} className="text-red-600" />
+      return <ThumbsDown size={16} className="text-red-600 dark:text-red-400" />
     case 'dismissed':
-      return <X size={16} className="text-gray-500" />
+      return <X size={16} className="text-muted-foreground" />
     case 'starred':
-      return <Star size={16} className="text-blue-600" />
+      return <Star size={16} className="text-blue-600 dark:text-blue-400" />
     case 'skipped':
-      return <Eye size={16} className="text-gray-400" />
+      return <Eye size={16} className="text-muted-foreground" />
     default:
-      return <Eye size={16} className="text-gray-400" />
+      return <Eye size={16} className="text-muted-foreground" />
   }
 }
 
@@ -147,8 +147,8 @@ export function ActivityFeed({ supportSignals, userStates }: ActivityFeedProps) 
       <Card>
         <CardContent className="text-center py-12">
           <div className="text-4xl mb-4">📱</div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No activity yet</h3>
-          <p className="text-gray-500 mb-6">
+          <h3 className="text-lg font-medium text-foreground mb-2">No activity yet</h3>
+          <p className="text-muted-foreground mb-6">
             Start exploring proposals in your feed to see your activity here.
           </p>
           <Link href="/feed">
@@ -201,23 +201,22 @@ export function ActivityFeed({ supportSignals, userStates }: ActivityFeedProps) 
               <CardContent className="p-4">
                 <div className="flex items-start gap-3">
                   {/* Thumbnail */}
-                  <div className="w-12 h-12 bg-gray-100 rounded-lg flex-shrink-0 flex items-center justify-center overflow-hidden">
+                  <div className="w-12 h-12 bg-muted rounded-lg flex-shrink-0 flex items-center justify-center overflow-hidden">
                     {activity.proposal.imageUrl ? (
                       <img
                         src={activity.proposal.imageUrl}
                         alt={activity.proposal.title}
-                        className="w-full h-full object-cover rounded-lg"
-                        style={{ maxWidth: '100%', height: 'auto' }}
+                        className="w-full h-full object-cover rounded-lg max-w-full"
                       />
                     ) : (
-                      <div className="text-gray-400 text-xl">📋</div>
+                      <div className="text-muted-foreground text-xl">📋</div>
                     )}
                   </div>
 
                   {/* Content */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2 mb-1">
-                      <h3 className="font-medium text-sm text-gray-900 truncate">
+                      <h3 className="font-medium text-sm text-foreground truncate">
                         {activity.proposal.title}
                       </h3>
                       <div className="flex items-center gap-1 flex-shrink-0">
@@ -225,7 +224,7 @@ export function ActivityFeed({ supportSignals, userStates }: ActivityFeedProps) 
                       </div>
                     </div>
                     
-                    <div className="flex items-center justify-between text-xs text-gray-500">
+                    <div className="flex items-center justify-between text-xs text-muted-foreground">
                       <span>
                         {getActionLabel(activity.type)} • {activity.proposal.channel.name}
                       </span>
@@ -234,13 +233,13 @@ export function ActivityFeed({ supportSignals, userStates }: ActivityFeedProps) 
 
                     {/* Progress indicator */}
                     <div className="mt-2 flex items-center gap-2">
-                      <div className="flex-1 h-1 bg-gray-200 rounded-full">
+                      <div className="flex-1 h-1 progress-bar">
                         <div 
-                          className="h-1 bg-orange-500 rounded-full transition-all"
+                          className="h-1 progress-fill"
                           style={{ width: `${Math.min(100, (activity.proposal._count.supports / 5) * 100)}%` }}
                         />
                       </div>
-                      <span className="text-xs text-gray-400">
+                      <span className="text-xs text-muted-foreground">
                         {activity.proposal._count.supports}
                       </span>
                     </div>

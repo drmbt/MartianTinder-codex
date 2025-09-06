@@ -141,8 +141,8 @@ export function ImageUpload({
         <div
           className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
             isDragging
-              ? 'border-orange-500 bg-orange-50'
-              : 'border-gray-300 hover:border-gray-400'
+              ? 'border-primary bg-primary/10'
+              : 'border-muted hover:border-muted-foreground'
           } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
@@ -162,15 +162,15 @@ export function ImageUpload({
           <div className="flex flex-col items-center space-y-2">
             {isUploading ? (
               <>
-                <Loader2 className="h-8 w-8 text-gray-400 animate-spin" />
-                <p className="text-sm text-gray-600">Uploading...</p>
+                <Loader2 className="h-8 w-8 text-muted-foreground animate-spin" />
+                <p className="text-sm text-muted-foreground">Uploading...</p>
               </>
             ) : (
               <>
-                <Upload className="h-8 w-8 text-gray-400" />
-                <div className="text-sm text-gray-600">
+                <Upload className="h-8 w-8 text-muted-foreground" />
+                <div className="text-sm text-muted-foreground">
                   <p className="font-medium">Click to upload or drag and drop</p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-muted-foreground">
                     PNG, JPG, WebP up to 5MB ({remainingSlots} slots remaining)
                   </p>
                 </div>
@@ -182,7 +182,7 @@ export function ImageUpload({
 
       {/* Error Message */}
       {error && (
-        <div className="text-red-600 text-sm bg-red-50 p-3 rounded-lg">
+        <div className="text-sm status-error p-3 rounded-lg">
           {error}
         </div>
       )}

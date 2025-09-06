@@ -137,10 +137,10 @@ export default async function ExpiredProposalsPage() {
                     <CardContent>
                       <p className="text-gray-600 line-clamp-2">{proposal.note}</p>
                       <div className="flex items-center justify-between mt-3 text-sm text-gray-500">
-                        <span>Created {new Date(proposal.createdAt).toLocaleDateString()}</span>
+                        <span>Created {new Date(proposal.createdAt).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })}</span>
                         <div className="flex items-center space-x-1">
                           <Clock className="h-3 w-3" />
-                          <span>Expired {new Date(proposal.expiresAt!).toLocaleDateString()}</span>
+                          <span>Expired {new Date(proposal.expiresAt!).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })}</span>
                         </div>
                       </div>
                       

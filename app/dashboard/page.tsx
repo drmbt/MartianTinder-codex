@@ -84,7 +84,7 @@ export default async function DashboardPage() {
                       <div key={event.id} className="text-sm">
                         <div className="font-medium">{event.title}</div>
                         <div className="text-gray-500">
-                          {new Date(event.startAt).toLocaleDateString()}
+                          {new Date(event.startAt).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })}
                         </div>
                       </div>
                     ))}

@@ -72,11 +72,11 @@ export function ProposalActions({ proposalId, isOwner, hasEvent, title }: Propos
         </DropdownMenuTrigger>
         <DropdownMenuContent 
           align="end" 
-          className="bg-white border border-gray-200 shadow-lg rounded-md p-1 min-w-[160px] z-50"
+          className="bg-background border border-border shadow-lg rounded-md p-1 min-w-[160px] z-50"
         >
           <DropdownMenuItem 
             onClick={() => router.push(`/proposals/${proposalId}/edit`)}
-            className="flex items-center px-2 py-2 text-sm cursor-pointer hover:bg-gray-100 rounded-sm"
+            className="flex items-center px-2 py-2 text-sm cursor-pointer hover:bg-muted rounded-sm"
           >
             <Edit className="mr-2 h-4 w-4" />
             Edit Proposal
@@ -85,18 +85,18 @@ export function ProposalActions({ proposalId, isOwner, hasEvent, title }: Propos
           {hasEvent && (
             <DropdownMenuItem 
               onClick={() => router.push(`/events/${proposalId}`)}
-              className="flex items-center px-2 py-2 text-sm cursor-pointer hover:bg-gray-100 rounded-sm"
+              className="flex items-center px-2 py-2 text-sm cursor-pointer hover:bg-muted rounded-sm"
             >
               <Calendar className="mr-2 h-4 w-4" />
               View Event
             </DropdownMenuItem>
           )}
           
-          <DropdownMenuSeparator className="my-1 border-gray-200" />
+          <DropdownMenuSeparator className="my-1 border-border" />
           
           <DropdownMenuItem 
             onClick={() => setShowDeleteDialog(true)}
-            className="flex items-center px-2 py-2 text-sm cursor-pointer hover:bg-red-50 text-red-600 rounded-sm"
+            className="flex items-center px-2 py-2 text-sm cursor-pointer hover-error text-red-600 dark:text-red-400 rounded-sm"
           >
             <Trash2 className="mr-2 h-4 w-4" />
             Delete Proposal
@@ -106,13 +106,13 @@ export function ProposalActions({ proposalId, isOwner, hasEvent, title }: Propos
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <DialogContent className="bg-white border border-gray-200 shadow-xl rounded-lg p-6 max-w-md mx-auto">
+        <DialogContent className="bg-background border border-border shadow-xl rounded-lg p-6 max-w-md mx-auto">
           <DialogHeader>
             <DialogTitle>Delete Proposal</DialogTitle>
             <DialogDescription>
               Are you sure you want to delete "{title}"? This action cannot be undone.
               {hasEvent && (
-                <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded">
+                <div className="mt-2 p-2 status-warning border-warning rounded">
                   <strong>Warning:</strong> This proposal has an associated event that will also be deleted.
                 </div>
               )}

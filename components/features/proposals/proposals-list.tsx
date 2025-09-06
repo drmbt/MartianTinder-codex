@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Plus, Calendar, Users, Clock } from "lucide-react"
+import { Plus, Users, Clock } from "lucide-react"
 import Link from "next/link"
 import { formatDistanceToNow } from "date-fns"
 
@@ -66,15 +66,15 @@ const getStatusBadge = (proposal: Proposal) => {
   
   switch (status) {
     case 'reified':
-      return <Badge className="bg-green-100 text-green-800">Event Created</Badge>
+      return <Badge className="status-success">Event Created</Badge>
     case 'draft':
       return <Badge variant="secondary">Draft</Badge>
     case 'expired':
       return <Badge variant="destructive">Expired</Badge>
     case 'threshold_met':
-      return <Badge className="bg-orange-100 text-orange-800">Threshold Met</Badge>
+      return <Badge className="status-active">Threshold Met</Badge>
     case 'published':
-      return <Badge className="bg-blue-100 text-blue-800">Active</Badge>
+      return <Badge className="status-info">Active</Badge>
     default:
       return <Badge variant="outline">Unknown</Badge>
   }
@@ -112,8 +112,8 @@ export function ProposalsList({ proposals }: ProposalsListProps) {
       <Card>
         <CardContent className="text-center py-12">
           <div className="text-4xl mb-4">💡</div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No proposals yet</h3>
-          <p className="text-gray-500 mb-6">
+          <h3 className="text-lg font-medium text-foreground mb-2">No proposals yet</h3>
+          <p className="text-muted-foreground mb-6">
             Start by creating your first proposal to coordinate with your community.
           </p>
           <Link href="/proposals/new">
@@ -185,29 +185,28 @@ export function ProposalsList({ proposals }: ProposalsListProps) {
               <CardContent className="p-4">
                 <div className="flex items-start gap-3">
                   {/* Thumbnail */}
-                  <div className="w-12 h-12 bg-gray-100 rounded-lg flex-shrink-0 flex items-center justify-center overflow-hidden">
+                  <div className="w-12 h-12 bg-muted rounded-lg flex-shrink-0 flex items-center justify-center overflow-hidden">
                     {proposal.imageUrl ? (
                       <img
                         src={proposal.imageUrl}
                         alt={proposal.title}
-                        className="w-full h-full object-cover rounded-lg"
-                        style={{ maxWidth: '100%', height: 'auto' }}
+                        className="w-full h-full object-cover rounded-lg max-w-full"
                       />
                     ) : (
-                      <div className="text-gray-400 text-xl">💡</div>
+                      <div className="text-muted-foreground text-xl">💡</div>
                     )}
                   </div>
 
                   {/* Content */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2 mb-1">
-                      <h3 className="font-medium text-sm text-gray-900 truncate">
+                      <h3 className="font-medium text-sm text-foreground truncate">
                         {proposal.title}
                       </h3>
                       {getStatusBadge(proposal)}
                     </div>
                     
-                    <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
+                    <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
                       <span className="flex items-center gap-1">
                         <Users size={12} />
                         {proposal.channel.name}
@@ -221,13 +220,13 @@ export function ProposalsList({ proposals }: ProposalsListProps) {
                     {/* Progress indicator */}
                     {proposal.threshold && proposal.threshold > 0 && (
                       <div className="flex items-center gap-2">
-                        <div className="flex-1 h-1 bg-gray-200 rounded-full">
+                        <div className="flex-1 h-1 progress-bar">
                           <div 
-                            className="h-1 bg-orange-500 rounded-full transition-all"
+                            className="h-1 progress-fill"
                             style={{ width: `${Math.min(100, (proposal._count.supports / proposal.threshold) * 100)}%` }}
                           />
                         </div>
-                        <span className="text-xs text-gray-400">
+                        <span className="text-xs text-muted-foreground">
                           {proposal._count.supports}/{proposal.threshold}
                         </span>
                       </div>
@@ -244,7 +243,7 @@ export function ProposalsList({ proposals }: ProposalsListProps) {
         <Card>
           <CardContent className="text-center py-8">
             <div className="text-2xl mb-2">🔍</div>
-            <p className="text-gray-500">No proposals match the current filter.</p>
+            <p className="text-muted-foreground">No proposals match the current filter.</p>
           </CardContent>
         </Card>
       )}
