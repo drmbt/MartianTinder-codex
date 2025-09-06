@@ -18,7 +18,7 @@ interface ProposalBasicInfoProps {
     note: string
   }
   errors: Record<string, string>
-  onChange: (field: string, value: any) => void
+  onChange: (field: string, value: string) => void
 }
 
 export function ProposalBasicInfo({

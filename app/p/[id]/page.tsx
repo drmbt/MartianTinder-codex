@@ -8,13 +8,14 @@ import { Badge } from "@/components/ui/badge"
 import { Calendar, Users, MessageSquare, ExternalLink } from "lucide-react"
 import { SupportButtons } from "@/components/features/proposals/support-buttons"
 import { ProposalActions } from "@/components/features/proposals/proposal-actions"
+import { ImageGallery } from "@/components/ui/image-gallery"
 import { SupportType, SupportVisibility } from "@/types"
 import Link from "next/link"
 
 interface ProposalPageProps {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
 export default async function ProposalPage({ params }: ProposalPageProps) {
@@ -37,6 +38,11 @@ export default async function ProposalPage({ params }: ProposalPageProps) {
         }
       },
       event: true,
+      images: {
+        orderBy: {
+          order: 'asc'
+        }
+      },
       _count: {
         select: {
           supports: true
@@ -63,9 +69,9 @@ export default async function ProposalPage({ params }: ProposalPageProps) {
   ])
 
   const supportStats = {
-    supports: supportCounts.find((s: any) => s.type === 'support')?._count || 0,
-    supersupports: supportCounts.find((s: any) => s.type === 'supersupport')?._count || 0,
-    opposes: supportCounts.find((s: any) => s.type === 'oppose')?._count || 0,
+    supports: supportCounts.find((s) => s.type === 'support')?._count || 0,
+    supersupports: supportCounts.find((s) => s.type === 'supersupport')?._count || 0,
+    opposes: supportCounts.find((s) => s.type === 'oppose')?._count || 0,
   }
 
   if (!proposal) {
@@ -144,22 +150,30 @@ export default async function ProposalPage({ params }: ProposalPageProps) {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Main Content */}
             <div className="lg:col-span-2 space-y-6">
+              {/* Image Gallery */}
+              {(proposal.images?.length > 0 || proposal.imageUrl) && (
+                <Card>
+                  <CardContent className="p-0">
+                    <ImageGallery 
+                      images={
+                        proposal.images && proposal.images.length > 0 
+                          ? proposal.images.map((img) => img.url)
+                          : proposal.imageUrl ? [proposal.imageUrl] : []
+                      }
+                      alt={proposal.title}
+                      className="w-full h-64 sm:h-80 md:h-96"
+                    />
+                  </CardContent>
+                </Card>
+              )}
+              
               <Card>
                 <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="space-y-2">
-                      <CardTitle className="text-2xl">{proposal.title}</CardTitle>
-                      <CardDescription>
-                        by {proposal.owner.name || proposal.owner.email} in {proposal.channel.name}
-                      </CardDescription>
-                    </div>
-                    {proposal.imageUrl && (
-                      <img 
-                        src={proposal.imageUrl} 
-                        alt={proposal.title}
-                        className="w-20 h-20 object-cover rounded-lg"
-                      />
-                    )}
+                  <div className="space-y-2">
+                    <CardTitle className="text-2xl">{proposal.title}</CardTitle>
+                    <CardDescription>
+                      by {proposal.owner.name || proposal.owner.email} in {proposal.channel.name}
+                    </CardDescription>
                   </div>
                 </CardHeader>
                 <CardContent>

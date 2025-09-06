@@ -13,7 +13,7 @@ interface ProposalSchedulingProps {
     suggestedEventDate: string
   }
   onPublishModeChange: (mode: 'draft' | 'now' | 'scheduled') => void
-  onChange: (field: string, value: any) => void
+  onChange: (field: string, value: string) => void
 }
 
 export function ProposalScheduling({

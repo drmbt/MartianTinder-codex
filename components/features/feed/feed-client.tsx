@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { TinderFeed } from "./tinder-feed"
 import { FeedFilters, type FeedFilters as FeedFiltersType } from "./feed-filters"
+import { TinderCardSkeleton } from "@/components/ui/proposal-skeleton"
 
 interface FeedClientProps {
   userId: string
@@ -52,6 +53,7 @@ export function FeedClient({ userId }: FeedClientProps) {
             <h1 className="text-3xl font-bold">Feed</h1>
             <p className="text-gray-600">Loading proposals...</p>
           </div>
+          <TinderCardSkeleton />
         </div>
       </div>
     )

@@ -2,9 +2,9 @@ import { auth } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import { prisma } from "@/lib/prisma"
 import { AuthenticatedLayout } from "@/components/layout/authenticated-layout"
-import { ProfileSettings } from "@/components/features/profile/profile-settings"
+import { ProfileEditForm } from "@/components/features/profile/profile-edit-form"
 
-export default async function ProfilePage() {
+export default async function EditProfilePage() {
   const session = await auth()
   
   if (!session?.user?.id) {
@@ -22,7 +22,7 @@ export default async function ProfilePage() {
   })
 
   if (!user) {
-    redirect("/login")
+    redirect("/profile")
   }
 
   return (
@@ -30,15 +30,15 @@ export default async function ProfilePage() {
       <div className="container mx-auto px-4 py-6">
         <div className="max-w-2xl mx-auto">
           <div className="text-center space-y-2 mb-6">
-            <h1 className="text-2xl font-bold">Profile</h1>
+            <h1 className="text-2xl font-bold">Edit Profile</h1>
             <p className="text-gray-600 text-sm">
-              Manage your profile and app settings
+              Update your profile information and photos
             </p>
           </div>
           
-          <ProfileSettings user={user} />
+          <ProfileEditForm user={user} />
         </div>
       </div>
     </AuthenticatedLayout>
   )
-} 
+}

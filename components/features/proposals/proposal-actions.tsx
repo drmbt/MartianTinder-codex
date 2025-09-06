@@ -110,7 +110,7 @@ export function ProposalActions({ proposalId, isOwner, hasEvent, title }: Propos
           <DialogHeader>
             <DialogTitle>Delete Proposal</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete "{title}"? This action cannot be undone.
+              Are you sure you want to delete &quot;{title}&quot;? This action cannot be undone.
               {hasEvent && (
                 <div className="mt-2 p-2 status-warning border-warning rounded">
                   <strong>Warning:</strong> This proposal has an associated event that will also be deleted.

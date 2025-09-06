@@ -25,7 +25,8 @@ export function useChannel() {
       body: data,
       successMessage: 'Channel created successfully!',
       onSuccess: (result) => {
-        router.push(`/c/${result.id}`)
+        const channelResult = result as { id: string }
+        router.push(`/c/${channelResult.id}`)
       },
     })
   }, [createApi, router])
@@ -36,7 +37,8 @@ export function useChannel() {
       body: data,
       successMessage: 'Successfully joined channel!',
       onSuccess: (result) => {
-        router.push(`/c/${result.channelId}`)
+        const joinResult = result as { channelId: string }
+        router.push(`/c/${joinResult.channelId}`)
       },
     })
   }, [joinApi, router])
@@ -52,7 +54,7 @@ export function useChannel() {
 /**
  * Hook for fetching channel feed
  */
-export function useChannelFeed(channelId?: string, filters?: any) {
+export function useChannelFeed(channelId?: string) {
   const url = channelId 
     ? `/api/feed?channelId=${channelId}`
     : '/api/feed'
@@ -66,8 +68,10 @@ export function useChannelFeed(channelId?: string, filters?: any) {
     })
   }, [feedApi])
 
+  const feedData = feedApi.data as { proposals?: unknown[] } | null
+  
   return {
-    proposals: feedApi.data?.proposals || [],
+    proposals: feedData?.proposals || [],
     fetchFeed,
     loading: feedApi.loading,
     error: feedApi.error,

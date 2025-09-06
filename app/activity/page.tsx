@@ -11,7 +11,7 @@ export default async function ActivityPage() {
     redirect("/login")
   }
 
-  // Get user's support signals (interactions)
+  // Get user's support signals (interactions) with images
   const supportSignals = await prisma.supportSignal.findMany({
     where: { userId: session.user.id },
     include: {
@@ -19,6 +19,15 @@ export default async function ActivityPage() {
         include: {
           channel: true,
           owner: true,
+          images: {
+            select: {
+              url: true,
+              order: true
+            },
+            orderBy: {
+              order: 'asc'
+            }
+          },
           _count: {
             select: {
               supports: true
@@ -30,7 +39,7 @@ export default async function ActivityPage() {
     orderBy: { createdAt: "desc" }
   })
 
-  // Get user's other interactions (skip/dismiss/star)
+  // Get user's other interactions (skip/dismiss/star) with images
   const userStates = await prisma.proposalUserState.findMany({
     where: { userId: session.user.id },
     include: {
@@ -38,6 +47,15 @@ export default async function ActivityPage() {
         include: {
           channel: true,
           owner: true,
+          images: {
+            select: {
+              url: true,
+              order: true
+            },
+            orderBy: {
+              order: 'asc'
+            }
+          },
           _count: {
             select: {
               supports: true

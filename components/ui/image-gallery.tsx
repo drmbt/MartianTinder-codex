@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, useCallback } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "./button"
 
@@ -26,24 +26,46 @@ export function ImageGallery({
   const imageRef = useRef<HTMLImageElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
+  // Handle touch events for mobile
+  const handleTouchStart = useRef<number>(0)
+  const handleTouchMove = useRef<number>(0)
+
+  const goToNext = useCallback(() => {
+    setCurrentIndex((prev) => (prev + 1) % images.length)
+  }, [images.length])
+
+  const goToPrevious = useCallback(() => {
+    setCurrentIndex((prev) => (prev - 1 + images.length) % images.length)
+  }, [images.length])
+
+  const goToSlide = useCallback((index: number) => {
+    setCurrentIndex(index)
+  }, [])
+
+  // Handle keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!images || images.length <= 1) return
+
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault()
+        goToPrevious()
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault()
+        goToNext()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [images, goToNext, goToPrevious])
+
   if (!images || images.length === 0) {
     return (
       <div className={`bg-gray-100 flex items-center justify-center ${className}`}>
         <div className="text-gray-400 text-4xl">📷</div>
       </div>
     )
-  }
-
-  const goToNext = () => {
-    setCurrentIndex((prev) => (prev + 1) % images.length)
-  }
-
-  const goToPrevious = () => {
-    setCurrentIndex((prev) => (prev - 1 + images.length) % images.length)
-  }
-
-  const goToSlide = (index: number) => {
-    setCurrentIndex(index)
   }
 
   // Handle touch/click events for left/right tap navigation
@@ -63,10 +85,6 @@ export function ImageGallery({
       goToNext()
     }
   }
-
-  // Handle touch events for mobile
-  const handleTouchStart = useRef<number>(0)
-  const handleTouchMove = useRef<number>(0)
 
   const onTouchStart = (e: React.TouchEvent) => {
     handleTouchStart.current = e.touches[0].clientX
@@ -90,24 +108,6 @@ export function ImageGallery({
       }
     }
   }
-
-  // Handle keyboard navigation
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (images.length <= 1) return
-      
-      if (e.key === 'ArrowLeft') {
-        e.preventDefault()
-        goToPrevious()
-      } else if (e.key === 'ArrowRight') {
-        e.preventDefault()
-        goToNext()
-      }
-    }
-
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [images.length])
 
   return (
     <div 
@@ -178,7 +178,7 @@ export function ImageGallery({
       {images.length > 1 && showDots && (
         <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex space-x-1">
           {images.map((_, index) => (
-            <button
+            <Button
               key={index}
               className={`w-2 h-2 rounded-full transition-all ${
                 index === currentIndex

@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
     if (validatedData.images && Array.isArray(validatedData.images) && validatedData.images.length > 0) {
       try {
         await prisma.proposalImage.createMany({
-          data: validatedData.images.map((img: any, index: number) => ({
+          data: validatedData.images.map((img, index) => ({
             proposalId: proposal.id,
             url: img.url,
             fileName: img.fileName,

@@ -56,7 +56,7 @@ export default async function NewProposalPage() {
             </p>
           </div>
           
-          <ProposalForm channels={userChannels.map((m: any) => m.channel)} />
+          <ProposalForm channels={userChannels.map((m) => m.channel)} />
         </div>
       </div>
     </AuthenticatedLayout>

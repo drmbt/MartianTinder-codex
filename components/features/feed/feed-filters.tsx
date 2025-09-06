@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Filter, Clock, Users, Target } from "lucide-react"
+import { Filter, Clock, Target } from "lucide-react"
 
 interface FeedFiltersProps {
   onFilterChange: (filters: FeedFilters) => void
@@ -50,9 +50,9 @@ export function FeedFilters({ onFilterChange, channels, initialFilters }: FeedFi
                           filters.showExpired
 
   return (
-    <Card className="mb-6">
+    <Card className="p-0">
       <CardContent className="p-4">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Filter size={16} className="text-gray-500" />
             <span className="font-medium text-sm">Discovery Settings</span>

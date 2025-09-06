@@ -4,6 +4,7 @@ import { PrismaAdapter } from "@auth/prisma-adapter"
 import { prisma } from "./prisma"
 import { env } from "./env"
 
+// @ts-expect-error - NextAuth v5 beta has type issues with default export
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
   debug: env.NODE_ENV === "development",
@@ -45,13 +46,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     verifyRequest: "/auth/verify-request",
   },
   callbacks: {
-    session: async ({ session, token }) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    session: async ({ session, token }: { session: any; token: any }) => {
       if (session?.user && token?.sub) {
         session.user.id = token.sub
       }
       return session
     },
-    jwt: async ({ user, token }) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    jwt: async ({ user, token }: { user: any; token: any }) => {
       if (user) {
         token.sub = user.id
       }

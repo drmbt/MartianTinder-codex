@@ -3,9 +3,8 @@ import { redirect } from "next/navigation"
 import { prisma } from "@/lib/prisma"
 import { AuthenticatedLayout } from "@/components/layout/authenticated-layout"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Edit, Calendar, Clock } from "lucide-react"
+import { Edit, Clock } from "lucide-react"
 import Link from "next/link"
 
 export default async function DraftsPage() {

@@ -1,4 +1,4 @@
-import { writeFile, mkdir } from 'fs/promises'
+import { mkdir } from 'fs/promises'
 import { join } from 'path'
 import { randomUUID } from 'crypto'
 import sharp from 'sharp'
@@ -46,7 +46,8 @@ export function validateFile(file: File): ValidationResult {
   }
 
   // Check file type
-  if (!UPLOAD_CONFIG.allowedTypes.includes(file.type as any)) {
+  const mimeType = file.type as typeof UPLOAD_CONFIG.allowedTypes[number]
+  if (!UPLOAD_CONFIG.allowedTypes.includes(mimeType)) {
     return {
       valid: false,
       error: `File type ${file.type} not allowed. Allowed types: ${UPLOAD_CONFIG.allowedTypes.join(', ')}`
@@ -54,8 +55,8 @@ export function validateFile(file: File): ValidationResult {
   }
 
   // Check file extension
-  const extension = '.' + file.name.split('.').pop()?.toLowerCase()
-  if (!UPLOAD_CONFIG.allowedExtensions.includes(extension as any)) {
+  const extension = ('.' + file.name.split('.').pop()?.toLowerCase()) as typeof UPLOAD_CONFIG.allowedExtensions[number]
+  if (!UPLOAD_CONFIG.allowedExtensions.includes(extension)) {
     return {
       valid: false,
       error: `File extension ${extension} not allowed. Allowed extensions: ${UPLOAD_CONFIG.allowedExtensions.join(', ')}`
@@ -139,7 +140,6 @@ export async function saveFile(file: File, subDir: string = ''): Promise<UploadR
 
     // Generate unique filename
     const fileName = generateFileName(file.name)
-    const filePath = join(uploadPath, fileName)
 
     // Convert File to Buffer
     const bytes = await file.arrayBuffer()

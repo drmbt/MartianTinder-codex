@@ -58,8 +58,9 @@ export function useProposal(proposalId?: string) {
       method: 'POST',
       successMessage: 'Proposal converted to event!',
       onSuccess: (data) => {
-        if (data.eventId) {
-          router.push(`/events/${data.eventId}`)
+        const eventData = data as { eventId?: string }
+        if (eventData.eventId) {
+          router.push(`/events/${eventData.eventId}`)
         }
       },
     })
@@ -82,27 +83,30 @@ export function useProposalForm() {
   const router = useRouter()
   const createApi = useApi('/api/proposals')
   
-  const createProposal = useCallback(async (data: any) => {
+  const createProposal = useCallback(async (data: Record<string, unknown>) => {
     return createApi.execute({
       method: 'POST',
       body: data,
       successMessage: 'Proposal created successfully!',
       onSuccess: (result) => {
-        router.push(`/p/${result.id}`)
+        const proposalResult = result as { id: string }
+        router.push(`/p/${proposalResult.id}`)
       },
     })
   }, [createApi, router])
 
-  const updateProposal = useCallback(async (id: string, data: any) => {
-    const updateApi = useApi(`/api/proposals/${id}`)
-    return updateApi.execute({
+  const updateProposal = useCallback(async (id: string, data: Record<string, unknown>) => {
+    const updateResponse = await fetch(`/api/proposals/${id}`, {
       method: 'PATCH',
-      body: data,
-      successMessage: 'Proposal updated successfully!',
-      onSuccess: () => {
-        router.push(`/p/${id}`)
-      },
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
     })
+    const result = await updateResponse.json()
+    if (!updateResponse.ok) {
+      throw new Error(result.error || 'Failed to update proposal')
+    }
+    router.push(`/p/${id}`)
+    return result
   }, [router])
 
   return {
@@ -116,23 +120,24 @@ export function useProposalForm() {
 /**
  * Hook for optimistic support updates
  */
-export function useOptimisticSupport(proposalId: string, initialStats: any) {
+export function useOptimisticSupport(proposalId: string, initialStats: Record<string, number>) {
   const optimisticApi = useOptimisticApi(
     `/api/proposals/${proposalId}/signal`,
     (current, action) => {
-      const newStats = { ...current }
+      const newStats = { ...(current as Record<string, number>) }
+      const signalAction = action as { type?: string; oldType?: string }
       
       // Remove old signal if exists
-      if (action.oldType) {
-        if (action.oldType === 'support') newStats.supports = Math.max(0, newStats.supports - 1)
-        else if (action.oldType === 'supersupport') newStats.supersupports = Math.max(0, newStats.supersupports - 1)
-        else if (action.oldType === 'oppose') newStats.opposes = Math.max(0, newStats.opposes - 1)
+      if (signalAction.oldType) {
+        if (signalAction.oldType === 'support') newStats.supports = Math.max(0, newStats.supports - 1)
+        else if (signalAction.oldType === 'supersupport') newStats.supersupports = Math.max(0, newStats.supersupports - 1)
+        else if (signalAction.oldType === 'oppose') newStats.opposes = Math.max(0, newStats.opposes - 1)
       }
       
       // Add new signal
-      if (action.type === 'support') newStats.supports++
-      else if (action.type === 'supersupport') newStats.supersupports++
-      else if (action.type === 'oppose') newStats.opposes++
+      if (signalAction.type === 'support') newStats.supports++
+      else if (signalAction.type === 'supersupport') newStats.supersupports++
+      else if (signalAction.type === 'oppose') newStats.opposes++
       
       return newStats
     }
@@ -141,7 +146,7 @@ export function useOptimisticSupport(proposalId: string, initialStats: any) {
   // Set initial data
   optimisticApi.setInitialData(initialStats)
 
-  const submitSignal = useCallback(async (type: SupportType, visibility: SupportVisibility = 'public', currentSignal?: any) => {
+  const submitSignal = useCallback(async (type: SupportType, visibility: SupportVisibility = 'public', currentSignal?: { type: string }) => {
     return optimisticApi.execute({
       method: 'POST',
       body: { type, visibility },

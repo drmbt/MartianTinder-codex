@@ -3,8 +3,7 @@
 import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { ChevronLeft, ChevronRight, Calendar, Clock, Users } from "lucide-react"
+import { ChevronLeft, ChevronRight, Clock } from "lucide-react"
 import Link from "next/link"
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay, addMonths, subMonths } from "date-fns"
 
@@ -43,7 +42,7 @@ interface CalendarViewProps {
 
 export function CalendarView({ proposals, events }: CalendarViewProps) {
   const [currentDate, setCurrentDate] = useState(new Date())
-  const [view, setView] = useState<'month' | 'week' | 'day'>('month')
+  // const [view, setView] = useState<'month' | 'week' | 'day'>('month')
 
   const monthStart = startOfMonth(currentDate)
   const monthEnd = endOfMonth(currentDate)
@@ -187,7 +186,7 @@ export function CalendarView({ proposals, events }: CalendarViewProps) {
                   </div>
 
                   <div className="space-y-1">
-                    {dayItems.slice(0, 3).map((item, index) => (
+                    {dayItems.slice(0, 3).map((item) => (
                       <Link
                         key={`${item.type}-${item.id}`}
                         href={item.type === 'proposal' ? `/p/${item.id}` : `/events/${item.id}`}

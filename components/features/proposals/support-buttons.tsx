@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useOptimistic, useTransition } from "react"
+import { useOptimistic, useTransition } from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Heart, Star, ThumbsDown, X, Bookmark, SkipForward } from "lucide-react"

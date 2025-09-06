@@ -1,252 +1,64 @@
 "use client"
 
-import { useState } from "react"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
+import { ProposalFeed, createFilterOptions, commonFilters } from "@/components/ui/proposal-feed"
+import type { ProposalData } from "@/components/ui/proposal-feed"
 import { Button } from "@/components/ui/button"
-import { Plus, Users, Clock } from "lucide-react"
+import { Plus } from "lucide-react"
 import Link from "next/link"
-import { formatDistanceToNow } from "date-fns"
-
-interface Proposal {
-  id: string
-  title: string
-  imageUrl: string | null
-  publishAt: Date | null
-  expiresAt: Date | null
-  threshold: number | null
-  createdAt: Date
-  channel: {
-    name: string
-  }
-  _count: {
-    supports: number
-  }
-  event: {
-    id: string
-  } | null
-}
 
 interface ProposalsListProps {
-  proposals: Proposal[]
-}
-
-// Helper function to determine proposal status
-const getProposalStatus = (proposal: Proposal) => {
-  const now = new Date()
-  
-  if (proposal.event) {
-    return 'reified'
-  }
-  
-  // Check if expired
-  if (proposal.expiresAt && proposal.expiresAt < now) {
-    return 'expired'
-  }
-  
-  // Check if published
-  const isPublished = !proposal.publishAt || proposal.publishAt <= now
-  
-  if (isPublished) {
-    const supportCount = proposal._count.supports
-    const threshold = proposal.threshold || 0
-    
-    if (threshold > 0 && supportCount >= threshold) {
-      return 'threshold_met'
-    }
-    
-    return 'published'
-  }
-  
-  return 'draft'
-}
-
-const getStatusBadge = (proposal: Proposal) => {
-  const status = getProposalStatus(proposal)
-  
-  switch (status) {
-    case 'reified':
-      return <Badge className="status-success">Event Created</Badge>
-    case 'draft':
-      return <Badge variant="secondary">Draft</Badge>
-    case 'expired':
-      return <Badge variant="destructive">Expired</Badge>
-    case 'threshold_met':
-      return <Badge className="status-active">Threshold Met</Badge>
-    case 'published':
-      return <Badge className="status-info">Active</Badge>
-    default:
-      return <Badge variant="outline">Unknown</Badge>
-  }
+  proposals: ProposalData[]
 }
 
 export function ProposalsList({ proposals }: ProposalsListProps) {
-  const [filter, setFilter] = useState<'all' | 'active' | 'supported' | 'expired' | 'drafts'>('all')
-
-  const now = new Date()
-  
-  const filteredProposals = proposals.filter(proposal => {
-    const status = getProposalStatus(proposal)
-    
-    if (filter === 'all') return true
-    if (filter === 'active') return status === 'published'
-    if (filter === 'supported') return status === 'threshold_met' || status === 'reified'
-    if (filter === 'expired') return status === 'expired'
-    if (filter === 'drafts') return status === 'draft'
-    return true
-  })
-
-  const counts = {
-    all: proposals.length,
-    active: proposals.filter(p => getProposalStatus(p) === 'published').length,
-    supported: proposals.filter(p => {
-      const status = getProposalStatus(p)
-      return status === 'threshold_met' || status === 'reified'
-    }).length,
-    expired: proposals.filter(p => getProposalStatus(p) === 'expired').length,
-    drafts: proposals.filter(p => getProposalStatus(p) === 'draft').length
+  // Custom filter for threshold met
+  const thresholdMetFilter = (proposal: ProposalData) => {
+    const threshold = proposal.threshold || 0
+    const totalSupport = proposal._count?.supports || 0
+    return threshold > 0 && totalSupport >= threshold && !proposal.event
   }
 
-  if (proposals.length === 0) {
-    return (
-      <Card>
-        <CardContent className="text-center py-12">
-          <div className="text-4xl mb-4">💡</div>
-          <h3 className="text-lg font-medium text-foreground mb-2">No proposals yet</h3>
-          <p className="text-muted-foreground mb-6">
-            Start by creating your first proposal to coordinate with your community.
-          </p>
+  // Create filter options with counts
+  const filterOptions = createFilterOptions(proposals, [
+    { key: 'all', label: 'All', filter: commonFilters.all },
+    { key: 'active', label: 'Active', filter: commonFilters.active },
+    { key: 'supported', label: 'Supported', filter: thresholdMetFilter },
+    { key: 'expired', label: 'Expired', filter: commonFilters.expired },
+    { key: 'drafts', label: 'Drafts', filter: commonFilters.draft },
+  ])
+
+  // Floating action button for mobile
+  const floatingAction = (
+    <div className="fixed bottom-20 right-4 md:hidden z-40">
+      <Link href="/proposals/new">
+        <Button size="lg" className="rounded-full h-14 w-14 shadow-lg">
+          <Plus size={24} />
+        </Button>
+      </Link>
+    </div>
+  )
+
+  return (
+    <ProposalFeed
+      proposals={proposals}
+      variant="compact"
+      showChannel={true}
+      showProgress={true}
+      filters={filterOptions}
+      floatingAction={floatingAction}
+      emptyState={{
+        icon: '💡',
+        title: 'No proposals yet',
+        description: 'Start by creating your first proposal to coordinate with your community.',
+        action: (
           <Link href="/proposals/new">
             <Button className="gap-2">
               <Plus size={16} />
               Create Proposal
             </Button>
           </Link>
-        </CardContent>
-      </Card>
-    )
-  }
-
-  return (
-    <div className="space-y-4">
-      {/* Floating create button - mobile only */}
-      <div className="fixed bottom-20 right-4 md:hidden z-40">
-        <Link href="/proposals/new">
-          <Button size="lg" className="rounded-full h-14 w-14 shadow-lg">
-            <Plus size={24} />
-          </Button>
-        </Link>
-      </div>
-
-      {/* Filter buttons */}
-      <div className="flex gap-2 overflow-x-auto pb-2">
-        <Button
-          variant={filter === 'all' ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => setFilter('all')}
-        >
-          All ({counts.all})
-        </Button>
-        <Button
-          variant={filter === 'active' ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => setFilter('active')}
-        >
-          Active ({counts.active})
-        </Button>
-        <Button
-          variant={filter === 'supported' ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => setFilter('supported')}
-        >
-          Supported ({counts.supported})
-        </Button>
-        <Button
-          variant={filter === 'expired' ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => setFilter('expired')}
-        >
-          Expired ({counts.expired})
-        </Button>
-        <Button
-          variant={filter === 'drafts' ? 'default' : 'outline'}
-          size="sm"
-          onClick={() => setFilter('drafts')}
-        >
-          Drafts ({counts.drafts})
-        </Button>
-      </div>
-
-      {/* Proposals list */}
-      <div className="space-y-3">
-        {filteredProposals.map((proposal) => (
-          <Link key={proposal.id} href={`/p/${proposal.id}`}>
-            <Card className="hover:shadow-md transition-shadow">
-              <CardContent className="p-4">
-                <div className="flex items-start gap-3">
-                  {/* Thumbnail */}
-                  <div className="w-12 h-12 bg-muted rounded-lg flex-shrink-0 flex items-center justify-center overflow-hidden">
-                    {proposal.imageUrl ? (
-                      <img
-                        src={proposal.imageUrl}
-                        alt={proposal.title}
-                        className="w-full h-full object-cover rounded-lg max-w-full"
-                      />
-                    ) : (
-                      <div className="text-muted-foreground text-xl">💡</div>
-                    )}
-                  </div>
-
-                  {/* Content */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-2 mb-1">
-                      <h3 className="font-medium text-sm text-foreground truncate">
-                        {proposal.title}
-                      </h3>
-                      {getStatusBadge(proposal)}
-                    </div>
-                    
-                    <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
-                      <span className="flex items-center gap-1">
-                        <Users size={12} />
-                        {proposal.channel.name}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Clock size={12} />
-                        {formatDistanceToNow(proposal.createdAt, { addSuffix: true })}
-                      </span>
-                    </div>
-
-                    {/* Progress indicator */}
-                    {proposal.threshold && proposal.threshold > 0 && (
-                      <div className="flex items-center gap-2">
-                        <div className="flex-1 h-1 progress-bar">
-                          <div 
-                            className="h-1 progress-fill"
-                            style={{ width: `${Math.min(100, (proposal._count.supports / proposal.threshold) * 100)}%` }}
-                          />
-                        </div>
-                        <span className="text-xs text-muted-foreground">
-                          {proposal._count.supports}/{proposal.threshold}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-        ))}
-      </div>
-
-      {filteredProposals.length === 0 && (
-        <Card>
-          <CardContent className="text-center py-8">
-            <div className="text-2xl mb-2">🔍</div>
-            <p className="text-muted-foreground">No proposals match the current filter.</p>
-          </CardContent>
-        </Card>
-      )}
-    </div>
+        )
+      }}
+    />
   )
-} 
+}

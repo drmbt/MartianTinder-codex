@@ -167,3 +167,7 @@ When implementing features:
 9. Include visual indicators for required form fields (*)
 10. Display Zod validation errors inline with form fields
 11. Use semantic color classes instead of hardcoded colors
+
+YOU MUST run `npx tsc --noEmit` after significant chunks of work to check for typescript errors and subsequently fix them.
+YOU MUST run `npm run lint` once you have a stable base without ts errors.
+DO NOT RUN `build`, `npm run build`, etc unprompted. the dev server is already running and compile time errors are caught by the above.

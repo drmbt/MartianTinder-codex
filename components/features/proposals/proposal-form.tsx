@@ -6,11 +6,9 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Badge } from "@/components/ui/badge"
 import { ImageUpload } from "@/components/ui/image-upload"
 import { Calendar, Clock, Save } from "lucide-react"
 import { createProposalSchema } from "@/lib/validations"
-import { z } from "zod"
 // Channel type definition
 interface Channel {
   id: string
@@ -35,6 +33,7 @@ interface ProposalFormProps {
     moderationMode: string
     externalChatUrl: string | null
     suggestedEventDate: string | null
+    images?: Array<{ id: string; url: string; order: number }>
   }
 }
 
@@ -42,22 +41,24 @@ export function ProposalForm({ channels, editingProposal }: ProposalFormProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [publishMode, setPublishMode] = useState<'draft' | 'now' | 'scheduled'>('now')
-  const [uploadedImages, setUploadedImages] = useState<Array<{url: string, fileName: string}>>([])
+  const [uploadedImages, setUploadedImages] = useState<Array<{url: string, fileName: string}>>(
+    editingProposal?.images?.map(img => ({ url: img.url, fileName: img.url.split('/').pop() || '' })) || []
+  )
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [formData, setFormData] = useState({
-    title: "",
-    note: "",
-    channelId: channels[0]?.id || "",
-    minCapacity: "",
-    maxCapacity: "",
-    threshold: "",
-    visibility: "channel" as const,
-    allowAnonymous: false,
-    moderationMode: "auto" as const,
-    externalChatUrl: "",
-    publishAt: "",
-    expiresAt: "",
-    suggestedEventDate: "", // Your "next Tuesday" example
+    title: editingProposal?.title || "",
+    note: editingProposal?.note || "",
+    channelId: editingProposal?.channelId || channels[0]?.id || "",
+    minCapacity: editingProposal?.minCapacity?.toString() || "",
+    maxCapacity: editingProposal?.maxCapacity?.toString() || "",
+    threshold: editingProposal?.threshold?.toString() || "",
+    visibility: editingProposal?.visibility || "channel" as const,
+    allowAnonymous: editingProposal?.allowAnonymous || false,
+    moderationMode: editingProposal?.moderationMode || "auto" as const,
+    externalChatUrl: editingProposal?.externalChatUrl || "",
+    publishAt: editingProposal?.publishAt ? new Date(editingProposal.publishAt).toISOString().slice(0, 16) : "",
+    expiresAt: editingProposal?.expiresAt ? new Date(editingProposal.expiresAt).toISOString().slice(0, 16) : "",
+    suggestedEventDate: editingProposal?.suggestedEventDate || "", // Your "next Tuesday" example
   })
 
   const handleSubmit = async (e: React.FormEvent, action: 'draft' | 'publish') => {
@@ -66,7 +67,7 @@ export function ProposalForm({ channels, editingProposal }: ProposalFormProps) {
 
     setIsLoading(true)
     try {
-      const submitData: any = {
+      const submitData: Record<string, unknown> = {
         ...formData,
         minCapacity: formData.minCapacity ? parseInt(formData.minCapacity) : undefined,
         maxCapacity: formData.maxCapacity ? parseInt(formData.maxCapacity) : undefined,
@@ -113,8 +114,11 @@ export function ProposalForm({ channels, editingProposal }: ProposalFormProps) {
 
       console.log("Submitting proposal data:", submitData)
 
-      const response = await fetch("/api/proposals", {
-        method: "POST",
+      const url = editingProposal ? `/api/proposals/${editingProposal.id}` : "/api/proposals"
+      const method = editingProposal ? "PATCH" : "POST"
+
+      const response = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify(submitData),
@@ -124,10 +128,10 @@ export function ProposalForm({ channels, editingProposal }: ProposalFormProps) {
       console.log("API response:", result)
 
       if (response.ok && result.success) {
-        router.push(`/p/${result.data.id}`)
+        router.push(`/p/${editingProposal?.id || result.data.id}`)
       } else {
-        console.error("Failed to create proposal:", result)
-        alert(`Failed to create proposal: ${result.error || result.details || 'Unknown error'}`)
+        console.error(`Failed to ${editingProposal ? 'update' : 'create'} proposal:`, result)
+        alert(`Failed to ${editingProposal ? 'update' : 'create'} proposal: ${result.error || result.details || 'Unknown error'}`)
       }
     } catch (error) {
       console.error("Error creating proposal:", error)
@@ -218,6 +222,7 @@ export function ProposalForm({ channels, editingProposal }: ProposalFormProps) {
               onRemove={(fileName) => {
                 setUploadedImages(prev => prev.filter(img => img.fileName !== fileName))
               }}
+              existingImages={uploadedImages.map(img => img.url)}
               subDir="proposals"
               maxFiles={5}
               disabled={isLoading}
@@ -382,10 +387,10 @@ export function ProposalForm({ channels, editingProposal }: ProposalFormProps) {
               disabled={isLoading || !formData.title || !formData.note || !formData.channelId}
               className="flex-1"
             >
-              {isLoading ? "Creating..." : 
+              {isLoading ? (editingProposal ? "Updating..." : "Creating...") : 
                publishMode === 'draft' ? "Save Draft" :
                publishMode === 'scheduled' ? "Schedule Proposal" : 
-               "Create & Publish"}
+               editingProposal ? "Update Proposal" : "Create & Publish"}
             </Button>
           </div>
 

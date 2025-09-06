@@ -3,10 +3,10 @@ import { toast } from 'sonner'
 
 interface ApiOptions {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH'
-  body?: any
+  body?: unknown
   headers?: Record<string, string>
   credentials?: RequestCredentials
-  onSuccess?: (data: any) => void
+  onSuccess?: (data: unknown) => void
   onError?: (error: string) => void
   successMessage?: string
   errorMessage?: string
@@ -21,7 +21,7 @@ interface ApiState<T> {
 /**
  * Generic API hook for consistent fetch handling
  */
-export function useApi<T = any>(url: string) {
+export function useApi<T = unknown>(url: string) {
   const [state, setState] = useState<ApiState<T>>({
     data: null,
     loading: false,
@@ -82,14 +82,14 @@ export function useApi<T = any>(url: string) {
 /**
  * Optimistic update hook for immediate UI feedback
  */
-export function useOptimisticApi<T = any>(
+export function useOptimisticApi<T = unknown>(
   url: string,
-  optimisticUpdate: (current: T, action: any) => T
+  optimisticUpdate: (current: T, action: unknown) => T
 ) {
   const [optimisticData, setOptimisticData] = useState<T | null>(null)
   const api = useApi<T>(url)
 
-  const executeOptimistic = useCallback(async (options: ApiOptions & { optimisticAction?: any } = {}) => {
+  const executeOptimistic = useCallback(async (options: ApiOptions & { optimisticAction?: unknown } = {}) => {
     // Apply optimistic update immediately
     if (optimisticData && options.optimisticAction) {
       setOptimisticData(optimisticUpdate(optimisticData, options.optimisticAction))
