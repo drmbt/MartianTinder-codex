@@ -25,6 +25,9 @@ export default async function EditProposalPage({ params }: EditProposalPageProps
             where: { userId: session.user.id }
           }
         }
+      },
+      images: {
+        orderBy: { order: 'asc' }
       }
     }
   })

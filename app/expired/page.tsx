@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma"
 import { AuthenticatedLayout } from "@/components/layout/authenticated-layout"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Clock, Users } from "lucide-react"
+import { Clock } from "lucide-react"
 import Link from "next/link"
 
 export default async function ExpiredProposalsPage() {
@@ -67,9 +67,9 @@ export default async function ExpiredProposalsPage() {
       })
 
       const stats = {
-        supports: supportCounts.find((s: any) => s.type === 'support')?._count || 0,
-        supersupports: supportCounts.find((s: any) => s.type === 'supersupport')?._count || 0,
-        opposes: supportCounts.find((s: any) => s.type === 'oppose')?._count || 0,
+        supports: supportCounts.find((s) => s.type === 'support')?._count || 0,
+        supersupports: supportCounts.find((s) => s.type === 'supersupport')?._count || 0,
+        opposes: supportCounts.find((s) => s.type === 'oppose')?._count || 0,
       }
 
       const totalSupport = stats.supports + stats.supersupports
@@ -137,10 +137,10 @@ export default async function ExpiredProposalsPage() {
                     <CardContent>
                       <p className="text-gray-600 line-clamp-2">{proposal.note}</p>
                       <div className="flex items-center justify-between mt-3 text-sm text-gray-500">
-                        <span>Created {new Date(proposal.createdAt).toLocaleDateString()}</span>
+                        <span>Created {new Date(proposal.createdAt).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })}</span>
                         <div className="flex items-center space-x-1">
                           <Clock className="h-3 w-3" />
-                          <span>Expired {new Date(proposal.expiresAt!).toLocaleDateString()}</span>
+                          <span>Expired {new Date(proposal.expiresAt!).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })}</span>
                         </div>
                       </div>
                       

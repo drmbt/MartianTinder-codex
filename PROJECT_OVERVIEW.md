@@ -1,8 +1,8 @@
 # MartianTinder - Project Overview
 
-**Version**: MVP v0.2  
-**Last Updated**: Post-Sprint 3 Completion  
-**Status**: Sprint 4 Development (Events & Calendar Integration)
+**Version**: MVP v0.3  
+**Last Updated**: Post-Sprint 5 UI/UX Polish  
+**Status**: Sprint 5 In Progress (Mobile UX & Advanced Features)
 
 ## Goals
 
@@ -144,8 +144,9 @@ A mobile-first, auth-gated community app with a 5-tab interface that lets people
 - **Frontend/Backend**: Next.js 15 (App Router) + TypeScript
 - **Database**: Prisma + SQLite (development), PostgreSQL (production)
 - **Authentication**: Auth.js v5 with email magic links
-- **Styling**: Tailwind CSS + shadcn/ui components (mobile-first)
-- **Validation**: Zod for input validation and type safety
+- **Styling**: Tailwind CSS v4 + shadcn/ui components (dark mode support)
+- **Validation**: Zod for input validation with inline error display
+- **Linting**: ESLint CLI with flat config (migrated from next lint)
 - **Calendar**: ical-generator for ICS file creation
 - **File Storage**: Local file system (configurable for cloud migration)
 
@@ -262,7 +263,7 @@ Events, vibe checks, petitions, norm setting, volunteer calls, rideshares, resou
 - Image upload size limits and supported formats
 - Calendar integration preferences per user
 
-## Current Status (Post-Sprint 3)
+## Current Status (Post-Sprint 5 Session 6)
 
 ### ✅ Completed Features
 - Complete authentication and session management
@@ -272,10 +273,15 @@ Events, vibe checks, petitions, norm setting, volunteer calls, rideshares, resou
 - Complete support signal system with threshold detection
 - Owner confirmation flow for event reification
 - Multiple feed types (main, drafts, expired, channel-specific)
+- **NEW: Full dark mode support with semantic color system**
+- **NEW: Zod form validation with inline error messages**
+- **NEW: Required field indicators throughout forms**
+- **NEW: Media upload infrastructure with Sharp optimization**
+- **NEW: Multi-image gallery component with swipe navigation**
 
-### 🎯 Next Priorities (Sprint 4)
-1. **5-Tab Navigation**: Implement mobile-first bottom tab architecture
-2. **Calendar Integration**: Google Calendar strategy with channel calendars
-3. **Event System**: Complete reification flow with ICS generation
-4. **Activity Tab**: User interaction history with mini-cards
-5. **Profile Management**: User tab with settings and integrations 
+### 🎯 Next Priorities (Sprint 5 Continuation)
+1. **Image Display Integration**: Show uploaded images in proposal details and feed cards
+2. **Mobile UX Polish**: Enhanced touch interactions and animations
+3. **5-Tab Navigation Refinement**: Swipe gestures between tabs
+4. **Calendar Integration**: Complete Google Calendar strategy
+5. **Profile Gallery**: User profile image management 

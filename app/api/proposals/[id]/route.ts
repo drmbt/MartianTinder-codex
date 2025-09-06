@@ -4,9 +4,9 @@ import { updateProposalSchema } from "@/lib/validations"
 import { NextRequest, NextResponse } from "next/server"
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
 export async function PATCH(request: NextRequest, { params }: RouteParams) {
@@ -34,17 +34,56 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: "Only the proposal owner can update it" }, { status: 403 })
     }
 
-    const updatedProposal = await prisma.proposal.update({
-      where: { id },
-      data: {
-        ...validatedData,
-        publishAt: validatedData.publishAt ? new Date(validatedData.publishAt) : undefined,
-        expiresAt: validatedData.expiresAt ? new Date(validatedData.expiresAt) : undefined,
-      },
-      include: {
-        channel: true,
-        owner: true,
-      },
+    // Handle images if provided - extract safely
+    const { images, ...proposalData } = validatedData as Record<string, unknown> & { 
+      images?: Array<{ url: string; fileName?: string }>
+      publishAt?: string
+      expiresAt?: string
+    }
+    
+    // Start a transaction to update proposal and images
+    const updatedProposal = await prisma.$transaction(async (tx) => {
+      // Update the proposal
+      await tx.proposal.update({
+        where: { id },
+        data: {
+          ...proposalData,
+          publishAt: proposalData.publishAt ? new Date(proposalData.publishAt as string) : undefined,
+          expiresAt: proposalData.expiresAt ? new Date(proposalData.expiresAt as string) : undefined,
+        },
+      })
+      
+      // If images were provided, update them
+      if (images && Array.isArray(images)) {
+        // Delete existing images
+        await tx.proposalImage.deleteMany({
+          where: { proposalId: id }
+        })
+        
+        // Create new images
+        if (images.length > 0) {
+          await tx.proposalImage.createMany({
+            data: images.map((img, index) => ({
+              proposalId: id,
+              url: img.url,
+              fileName: img.fileName || img.url.split('/').pop() || 'image.jpg',
+              order: index
+            }))
+          })
+        }
+      }
+      
+      // Return the updated proposal with all includes
+      return await tx.proposal.findUnique({
+        where: { id },
+        include: {
+          channel: true,
+          owner: true,
+          images: {
+            orderBy: { order: 'asc' }
+          }
+        }
+      })
     })
 
     return NextResponse.json({

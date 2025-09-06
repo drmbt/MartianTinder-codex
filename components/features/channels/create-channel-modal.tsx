@@ -40,7 +40,7 @@ export function CreateChannelModal({ children }: CreateChannelModalProps) {
       })
 
       if (response.ok) {
-        const result = await response.json()
+        await response.json()
         setIsOpen(false)
         setFormData({ name: "", description: "" })
         router.refresh() // Refresh to show new channel

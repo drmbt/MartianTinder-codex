@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth"
 import { redirect } from "next/navigation"
+import { prisma } from "@/lib/prisma"
 import { AuthenticatedLayout } from "@/components/layout/authenticated-layout"
 import { ProfileSettings } from "@/components/features/profile/profile-settings"
 
@@ -7,6 +8,20 @@ export default async function ProfilePage() {
   const session = await auth()
   
   if (!session?.user?.id) {
+    redirect("/login")
+  }
+
+  // Fetch user with images
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    include: {
+      images: {
+        orderBy: { order: 'asc' }
+      }
+    }
+  })
+
+  if (!user) {
     redirect("/login")
   }
 
@@ -21,7 +36,7 @@ export default async function ProfilePage() {
             </p>
           </div>
           
-          <ProfileSettings user={session.user} />
+          <ProfileSettings user={user} />
         </div>
       </div>
     </AuthenticatedLayout>

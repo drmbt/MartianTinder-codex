@@ -2,9 +2,8 @@
 
 import { useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Heart, Star, ThumbsDown, X, Eye } from "lucide-react"
+import { ProposalCard } from "@/components/ui/proposal-card"
 import Link from "next/link"
 import { formatDistanceToNow } from "date-fns"
 
@@ -15,7 +14,10 @@ interface SupportSignal {
   proposal: {
     id: string
     title: string
+    note: string
     imageUrl: string | null
+    images?: Array<{ url: string; order: number }>
+    threshold?: number | null
     channel: {
       name: string
     }
@@ -36,7 +38,10 @@ interface UserState {
   proposal: {
     id: string
     title: string
+    note: string
     imageUrl: string | null
+    images?: Array<{ url: string; order: number }>
+    threshold?: number | null
     channel: {
       name: string
     }
@@ -62,7 +67,10 @@ type ActivityItem = {
   proposal: {
     id: string
     title: string
+    note: string
     imageUrl: string | null
+    images?: Array<{ url: string; order: number }>
+    threshold?: number | null
     channel: {
       name: string
     }
@@ -73,44 +81,6 @@ type ActivityItem = {
     _count: {
       supports: number
     }
-  }
-}
-
-const getActionIcon = (type: string) => {
-  switch (type) {
-    case 'support':
-      return <Heart size={16} className="text-green-600" />
-    case 'supersupport':
-      return <Star size={16} className="text-yellow-500" />
-    case 'oppose':
-      return <ThumbsDown size={16} className="text-red-600" />
-    case 'dismissed':
-      return <X size={16} className="text-gray-500" />
-    case 'starred':
-      return <Star size={16} className="text-blue-600" />
-    case 'skipped':
-      return <Eye size={16} className="text-gray-400" />
-    default:
-      return <Eye size={16} className="text-gray-400" />
-  }
-}
-
-const getActionLabel = (type: string) => {
-  switch (type) {
-    case 'support':
-      return 'Supported'
-    case 'supersupport':
-      return 'Super Supported'
-    case 'oppose':
-      return 'Opposed'
-    case 'dismissed':
-      return 'Dismissed'
-    case 'starred':
-      return 'Starred'
-    case 'skipped':
-      return 'Skipped'
-    default:
-      return 'Interacted'
   }
 }
 
@@ -147,8 +117,8 @@ export function ActivityFeed({ supportSignals, userStates }: ActivityFeedProps) 
       <Card>
         <CardContent className="text-center py-12">
           <div className="text-4xl mb-4">📱</div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No activity yet</h3>
-          <p className="text-gray-500 mb-6">
+          <h3 className="text-lg font-medium text-foreground mb-2">No activity yet</h3>
+          <p className="text-muted-foreground mb-6">
             Start exploring proposals in your feed to see your activity here.
           </p>
           <Link href="/feed">
@@ -195,61 +165,34 @@ export function ActivityFeed({ supportSignals, userStates }: ActivityFeedProps) 
 
       {/* Activity list */}
       <div className="space-y-3">
-        {filteredActivities.map((activity) => (
-          <Link key={activity.id} href={`/p/${activity.proposal.id}`}>
-            <Card className="hover:shadow-md transition-shadow">
-              <CardContent className="p-4">
-                <div className="flex items-start gap-3">
-                  {/* Thumbnail */}
-                  <div className="w-12 h-12 bg-gray-100 rounded-lg flex-shrink-0 flex items-center justify-center overflow-hidden">
-                    {activity.proposal.imageUrl ? (
-                      <img
-                        src={activity.proposal.imageUrl}
-                        alt={activity.proposal.title}
-                        className="w-full h-full object-cover rounded-lg"
-                        style={{ maxWidth: '100%', height: 'auto' }}
-                      />
-                    ) : (
-                      <div className="text-gray-400 text-xl">📋</div>
-                    )}
-                  </div>
-
-                  {/* Content */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-2 mb-1">
-                      <h3 className="font-medium text-sm text-gray-900 truncate">
-                        {activity.proposal.title}
-                      </h3>
-                      <div className="flex items-center gap-1 flex-shrink-0">
-                        {getActionIcon(activity.type)}
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center justify-between text-xs text-gray-500">
-                      <span>
-                        {getActionLabel(activity.type)} • {activity.proposal.channel.name}
-                      </span>
-                      <span>{formatDistanceToNow(activity.timestamp, { addSuffix: true })}</span>
-                    </div>
-
-                    {/* Progress indicator */}
-                    <div className="mt-2 flex items-center gap-2">
-                      <div className="flex-1 h-1 bg-gray-200 rounded-full">
-                        <div 
-                          className="h-1 bg-orange-500 rounded-full transition-all"
-                          style={{ width: `${Math.min(100, (activity.proposal._count.supports / 5) * 100)}%` }}
-                        />
-                      </div>
-                      <span className="text-xs text-gray-400">
-                        {activity.proposal._count.supports}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-        ))}
+        {filteredActivities.map((activity) => {
+          // Map activity type to userSupport format for the proposal card
+          const proposalWithSupport = {
+            ...activity.proposal,
+            userSupport: ['support', 'supersupport', 'oppose'].includes(activity.type) 
+              ? activity.type 
+              : null,
+            createdAt: activity.timestamp // Use activity timestamp for sorting
+          }
+          
+          return (
+            <div key={activity.id} className="relative">
+              {/* Activity timestamp badge */}
+              <div className="absolute -top-2 right-2 z-10">
+                <span className="text-xs text-muted-foreground bg-background px-2">
+                  {formatDistanceToNow(activity.timestamp, { addSuffix: true })}
+                </span>
+              </div>
+              
+              <ProposalCard
+                proposal={proposalWithSupport}
+                variant="compact"
+                showChannel={true}
+                showProgress={true}
+              />
+            </div>
+          )
+        })}
       </div>
     </div>
   )

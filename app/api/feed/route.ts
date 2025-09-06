@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Build base where clause
-    let whereClause: any = {
+    const whereClause: Record<string, unknown> = {
       channelId: channelId ? channelId : { in: userChannelIds }
     }
 

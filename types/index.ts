@@ -19,11 +19,23 @@ export type ProposalStatus = 'draft' | 'published' | 'threshold_met' | 'reified'
 export type FeedFilter = 'all' | 'supported' | 'active' | 'expired' | 'starred'
 
 // API response types
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean
   data?: T
   error?: string
   message?: string
+}
+
+// React Hook Form types
+export interface FormFieldProps {
+  register: (name: string, options?: unknown) => {
+    name: string
+    ref: (instance: unknown) => void
+    onChange: (event: Event) => void
+    onBlur: (event: Event) => void
+  }
+  errors: Record<string, { message?: string }>
+  watch: (name?: string | string[]) => unknown
 }
 
 // Form types for proposal creation

@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { User, LogOut, Settings, Calendar } from "lucide-react"
+import { User, LogOut, Settings, Calendar, Home, Activity, Plus } from "lucide-react"
 
 export function Navbar() {
   const { data: session, status } = useSession()
@@ -55,17 +55,25 @@ export function Navbar() {
               🚀 MartianTinder
             </Link>
             <div className="hidden md:flex space-x-4">
-              <Link href="/feed" className="text-sm font-medium hover:text-orange-600 transition-colors">
+              <Link href="/feed" className="text-sm font-medium hover:text-orange-600 transition-colors flex items-center gap-1">
+                <Home size={16} />
                 Feed
               </Link>
-              <Link href="/channels" className="text-sm font-medium hover:text-orange-600 transition-colors">
-                Channels
+              <Link href="/activity" className="text-sm font-medium hover:text-orange-600 transition-colors flex items-center gap-1">
+                <Activity size={16} />
+                Activity
               </Link>
-              <Link href="/dashboard" className="text-sm font-medium hover:text-orange-600 transition-colors">
-                Dashboard
+              <Link href="/propose" className="text-sm font-medium hover:text-orange-600 transition-colors flex items-center gap-1">
+                <Plus size={16} />
+                Propose
               </Link>
-              <Link href="/drafts" className="text-sm font-medium hover:text-orange-600 transition-colors">
-                Drafts
+              <Link href="/calendar" className="text-sm font-medium hover:text-orange-600 transition-colors flex items-center gap-1">
+                <Calendar size={16} />
+                Calendar
+              </Link>
+              <Link href="/profile" className="text-sm font-medium hover:text-orange-600 transition-colors flex items-center gap-1">
+                <User size={16} />
+                Profile
               </Link>
             </div>
           </div>

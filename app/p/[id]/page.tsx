@@ -8,13 +8,14 @@ import { Badge } from "@/components/ui/badge"
 import { Calendar, Users, MessageSquare, ExternalLink } from "lucide-react"
 import { SupportButtons } from "@/components/features/proposals/support-buttons"
 import { ProposalActions } from "@/components/features/proposals/proposal-actions"
+import { ImageGallery } from "@/components/ui/image-gallery"
 import { SupportType, SupportVisibility } from "@/types"
 import Link from "next/link"
 
 interface ProposalPageProps {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
 export default async function ProposalPage({ params }: ProposalPageProps) {
@@ -37,6 +38,11 @@ export default async function ProposalPage({ params }: ProposalPageProps) {
         }
       },
       event: true,
+      images: {
+        orderBy: {
+          order: 'asc'
+        }
+      },
       _count: {
         select: {
           supports: true
@@ -63,9 +69,9 @@ export default async function ProposalPage({ params }: ProposalPageProps) {
   ])
 
   const supportStats = {
-    supports: supportCounts.find((s: any) => s.type === 'support')?._count || 0,
-    supersupports: supportCounts.find((s: any) => s.type === 'supersupport')?._count || 0,
-    opposes: supportCounts.find((s: any) => s.type === 'oppose')?._count || 0,
+    supports: supportCounts.find((s) => s.type === 'support')?._count || 0,
+    supersupports: supportCounts.find((s) => s.type === 'supersupport')?._count || 0,
+    opposes: supportCounts.find((s) => s.type === 'oppose')?._count || 0,
   }
 
   if (!proposal) {
@@ -144,22 +150,30 @@ export default async function ProposalPage({ params }: ProposalPageProps) {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Main Content */}
             <div className="lg:col-span-2 space-y-6">
+              {/* Image Gallery */}
+              {(proposal.images?.length > 0 || proposal.imageUrl) && (
+                <Card>
+                  <CardContent className="p-0">
+                    <ImageGallery 
+                      images={
+                        proposal.images && proposal.images.length > 0 
+                          ? proposal.images.map((img) => img.url)
+                          : proposal.imageUrl ? [proposal.imageUrl] : []
+                      }
+                      alt={proposal.title}
+                      className="w-full h-64 sm:h-80 md:h-96"
+                    />
+                  </CardContent>
+                </Card>
+              )}
+              
               <Card>
                 <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="space-y-2">
-                      <CardTitle className="text-2xl">{proposal.title}</CardTitle>
-                      <CardDescription>
-                        by {proposal.owner.name || proposal.owner.email} in {proposal.channel.name}
-                      </CardDescription>
-                    </div>
-                    {proposal.imageUrl && (
-                      <img 
-                        src={proposal.imageUrl} 
-                        alt={proposal.title}
-                        className="w-20 h-20 object-cover rounded-lg"
-                      />
-                    )}
+                  <div className="space-y-2">
+                    <CardTitle className="text-2xl">{proposal.title}</CardTitle>
+                    <CardDescription>
+                      by {proposal.owner.name || proposal.owner.email} in {proposal.channel.name}
+                    </CardDescription>
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -169,14 +183,14 @@ export default async function ProposalPage({ params }: ProposalPageProps) {
                     </div>
                     
                     {proposal.externalChatUrl && (
-                      <div className="flex items-center space-x-2 p-3 bg-blue-50 rounded-lg">
-                        <MessageSquare className="h-4 w-4 text-blue-600" />
+                      <div className="flex items-center space-x-2 p-3 status-info border-info rounded-lg">
+                        <MessageSquare className="h-4 w-4" />
                         <span className="text-sm font-medium">External Chat:</span>
                         <a 
                           href={proposal.externalChatUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-blue-600 hover:text-blue-800 flex items-center space-x-1"
+                          className="hover:underline flex items-center space-x-1"
                         >
                           <span>Join Discussion</span>
                           <ExternalLink className="h-3 w-3" />
@@ -199,11 +213,11 @@ export default async function ProposalPage({ params }: ProposalPageProps) {
                   <CardContent>
                     <div className="space-y-2">
                       <div>
-                        <span className="font-medium">When:</span> {new Date(proposal.event.startAt).toLocaleString()}
+                        <span className="font-medium">When:</span> {new Date(proposal.event.startAt).toLocaleString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                       </div>
                       {proposal.event.endAt && (
                         <div>
-                          <span className="font-medium">Until:</span> {new Date(proposal.event.endAt).toLocaleString()}
+                          <span className="font-medium">Until:</span> {new Date(proposal.event.endAt).toLocaleString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                         </div>
                       )}
                       {proposal.event.location && (
@@ -234,9 +248,9 @@ export default async function ProposalPage({ params }: ProposalPageProps) {
                         <span>Progress</span>
                         <span>{totalSupports} / {threshold || "∞"}</span>
                       </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="w-full progress-bar h-2">
                         <div 
-                          className="bg-green-600 h-2 rounded-full transition-all duration-300"
+                          className="progress-fill-success h-2 rounded-full transition-all duration-300"
                           style={{ 
                             width: threshold > 0 ? `${Math.min(100, (totalSupports / threshold) * 100)}%` : '0%' 
                           }}
@@ -297,12 +311,12 @@ export default async function ProposalPage({ params }: ProposalPageProps) {
                   {proposal.expiresAt && (
                     <div className="flex justify-between">
                       <span className="text-sm text-gray-500">Expires:</span>
-                      <span className="text-sm">{new Date(proposal.expiresAt).toLocaleDateString()}</span>
+                      <span className="text-sm">{new Date(proposal.expiresAt).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })}</span>
                     </div>
                   )}
                   <div className="flex justify-between">
                     <span className="text-sm text-gray-500">Created:</span>
-                    <span className="text-sm">{new Date(proposal.createdAt).toLocaleDateString()}</span>
+                    <span className="text-sm">{new Date(proposal.createdAt).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })}</span>
                   </div>
                 </CardContent>
               </Card>

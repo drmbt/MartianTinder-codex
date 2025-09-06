@@ -3,9 +3,8 @@ import { redirect } from "next/navigation"
 import { prisma } from "@/lib/prisma"
 import { AuthenticatedLayout } from "@/components/layout/authenticated-layout"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Edit, Calendar, Clock } from "lucide-react"
+import { Edit, Clock } from "lucide-react"
 import Link from "next/link"
 
 export default async function DraftsPage() {
@@ -79,7 +78,7 @@ export default async function DraftsPage() {
                               <Badge variant="secondary">Draft</Badge>
                             </CardTitle>
                             <CardDescription>
-                              in {proposal.channel.name} • Created {new Date(proposal.createdAt).toLocaleDateString()}
+                              in {proposal.channel.name} • Created {new Date(proposal.createdAt).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })}
                             </CardDescription>
                           </div>
                         </div>
@@ -118,11 +117,11 @@ export default async function DraftsPage() {
                             <CardTitle className="text-lg flex items-center space-x-2">
                               <span>{proposal.title}</span>
                               <Badge variant="outline">
-                                Publishes {new Date(proposal.publishAt!).toLocaleDateString()}
+                                Publishes {new Date(proposal.publishAt!).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })}
                               </Badge>
                             </CardTitle>
                             <CardDescription>
-                              in {proposal.channel.name} • Will publish {new Date(proposal.publishAt!).toLocaleString()}
+                              in {proposal.channel.name} • Will publish {new Date(proposal.publishAt!).toLocaleString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                             </CardDescription>
                           </div>
                         </div>
@@ -131,7 +130,7 @@ export default async function DraftsPage() {
                         <p className="text-gray-600 line-clamp-2">{proposal.note}</p>
                         {proposal.expiresAt && (
                           <p className="text-sm text-gray-500 mt-2">
-                            Expires {new Date(proposal.expiresAt).toLocaleString()}
+                            Expires {new Date(proposal.expiresAt).toLocaleString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                           </p>
                         )}
                       </CardContent>

@@ -2,17 +2,16 @@ import { auth } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import { prisma } from "@/lib/prisma"
 import { AuthenticatedLayout } from "@/components/layout/authenticated-layout"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Calendar, Users, MessageSquare, Plus } from "lucide-react"
+import { Users, MessageSquare, Plus } from "lucide-react"
 import { ChannelFeedClient } from "@/components/features/channels/channel-feed-client"
 import Link from "next/link"
 
 interface ChannelPageProps {
-  params: {
+  params: Promise<{
     channelId: string
-  }
+  }>
 }
 
 export default async function ChannelPage({ params }: ChannelPageProps) {
@@ -56,6 +55,13 @@ export default async function ChannelPage({ params }: ChannelPageProps) {
       proposals: {
         include: {
           owner: true,
+          images: {
+            orderBy: { order: 'asc' }
+          },
+          supports: {
+            where: { userId: session.user.id },
+            select: { type: true }
+          },
           _count: {
             select: {
               supports: {
@@ -118,10 +124,15 @@ export default async function ChannelPage({ params }: ChannelPageProps) {
                createdAt: p.createdAt.toISOString(),
                expiresAt: p.expiresAt?.toISOString() || null,
                threshold: p.threshold,
+               imageUrl: p.imageUrl,
+               images: p.images,
                owner: p.owner,
+               ownerId: p.ownerId,
+               userSupport: p.supports.length > 0 ? p.supports[0].type : null,
                _count: p._count
              }))}
              channelId={channelId}
+             userId={session.user.id}
            />
            
            {/* Fallback for empty channel */}

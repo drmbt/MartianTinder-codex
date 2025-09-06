@@ -10,13 +10,13 @@ export default async function LoginPage() {
   }
   
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-100 to-red-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-primary/5 flex items-center justify-center p-4">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center space-y-4">
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="text-3xl font-bold text-foreground">
             Welcome to MartianTinder
           </h1>
-          <p className="text-gray-600">
+          <p className="text-muted-foreground">
             Sign in with your email to access your community
           </p>
         </div>

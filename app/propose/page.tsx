@@ -11,13 +11,28 @@ export default async function ProposePage() {
     redirect("/login")
   }
 
-  // Get user's own proposals
+  // Get user's own proposals with images
   const userProposals = await prisma.proposal.findMany({
     where: { ownerId: session.user.id },
     include: {
       channel: {
         select: {
           name: true
+        }
+      },
+      owner: {
+        select: {
+          name: true,
+          email: true
+        }
+      },
+      images: {
+        select: {
+          url: true,
+          order: true
+        },
+        orderBy: {
+          order: 'asc'
         }
       },
       _count: {

@@ -4,9 +4,9 @@ import { supportSignalSchema } from "@/lib/validations"
 import { NextRequest, NextResponse } from "next/server"
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
 export async function POST(request: NextRequest, { params }: RouteParams) {

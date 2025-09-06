@@ -79,3 +79,4 @@ pids
 
 # Prisma
 /prisma/migrations/dev.db*
+.lh/

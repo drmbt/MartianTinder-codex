@@ -1,11 +1,10 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { ImageGallery } from "@/components/ui/image-gallery"
-import { Heart, Star, ThumbsDown, X, ArrowLeft, ArrowRight, ArrowUp, ArrowDown } from "lucide-react"
+import { ArrowLeft, ArrowRight, ArrowUp, ArrowDown } from "lucide-react"
 import Link from "next/link"
 
 interface ProposalData {
@@ -40,6 +39,63 @@ interface TinderFeedProps {
 export function TinderFeed({ proposals }: TinderFeedProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isAnimating, setIsAnimating] = useState(false)
+  const [swipeOffset, setSwipeOffset] = useState({ x: 0, y: 0 })
+  const [isDragging, setIsDragging] = useState(false)
+  const [exitAnimation, setExitAnimation] = useState<'left' | 'right' | 'up' | 'down' | null>(null)
+  
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null)
+  const cardRef = useRef<HTMLDivElement>(null)
+
+  const handleAction = useCallback(async (action: 'support' | 'supersupport' | 'oppose' | 'dismiss') => {
+    if (isAnimating || isDragging) return
+    
+    setIsAnimating(true)
+    
+    // Set exit animation direction based on action
+    const animationMap = {
+      'support': 'right' as const,
+      'dismiss': 'left' as const,
+      'supersupport': 'up' as const,
+      'oppose': 'down' as const
+    }
+    setExitAnimation(animationMap[action])
+
+    // Wait for animation to complete before API call
+    setTimeout(async () => {
+      try {
+        const currentProposal = proposals[currentIndex]
+        if (action === 'dismiss') {
+          // Mark as dismissed
+          await fetch(`/api/proposals/${currentProposal.id}/state`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ state: 'dismissed' }),
+          })
+        } else {
+          // Submit support signal
+          await fetch(`/api/proposals/${currentProposal.id}/signal`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ type: action, visibility: 'public' }),
+          })
+        }
+
+        // Move to next proposal and reset states
+        setTimeout(() => {
+          setCurrentIndex(prev => prev + 1)
+          setIsAnimating(false)
+          setExitAnimation(null)
+          setSwipeOffset({ x: 0, y: 0 })
+        }, 200)
+      } catch (error) {
+        console.error('Error submitting action:', error)
+        setIsAnimating(false)
+        setExitAnimation(null)
+      }
+    }, 400) // Delay API call to allow animation to start
+  }, [isAnimating, isDragging, proposals, currentIndex, setCurrentIndex, setIsAnimating, setExitAnimation, setSwipeOffset])
 
   // Add keyboard support for true Tinder experience
   useEffect(() => {
@@ -68,18 +124,18 @@ export function TinderFeed({ proposals }: TinderFeedProps) {
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [isAnimating, currentIndex])
+  }, [isAnimating, handleAction])
 
   if (proposals.length === 0) {
     return (
       <Card>
         <CardContent className="text-center py-16">
           <div className="text-6xl mb-4">🎉</div>
-          <h3 className="text-xl font-medium text-gray-900 mb-2">All caught up!</h3>
-          <p className="text-gray-500 mb-6">
-            You've seen all the new proposals in your channels.
+          <h3 className="text-xl font-medium text-foreground mb-2">All caught up!</h3>
+          <p className="text-muted-foreground mb-6">
+            You&apos;ve seen all the new proposals in your channels.
           </p>
-          <div className="space-y-2">
+          <div className="space-y-2 space-x-4">
             <Link href="/channels">
               <Button variant="outline">Browse Channels</Button>
             </Link>
@@ -101,9 +157,9 @@ export function TinderFeed({ proposals }: TinderFeedProps) {
       <Card>
         <CardContent className="text-center py-16">
           <div className="text-6xl mb-4">🎉</div>
-          <h3 className="text-xl font-medium text-gray-900 mb-2">All caught up!</h3>
-          <p className="text-gray-500 mb-6">
-            You've reviewed all the new proposals in your channels.
+          <h3 className="text-xl font-medium text-foreground mb-2">All caught up!</h3>
+          <p className="text-muted-foreground mb-6">
+            You&apos;ve reviewed all the new proposals in your channels.
           </p>
           <div className="space-y-2">
             <Link href="/channels">
@@ -121,61 +177,128 @@ export function TinderFeed({ proposals }: TinderFeedProps) {
     )
   }
 
-  const handleAction = async (action: 'support' | 'supersupport' | 'oppose' | 'dismiss') => {
+  // Touch/swipe handlers
+  const handleTouchStart = (e: React.TouchEvent) => {
     if (isAnimating) return
+    const touch = e.touches[0]
+    touchStartRef.current = { x: touch.clientX, y: touch.clientY }
+    setIsDragging(true)
+  }
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!touchStartRef.current || isAnimating) return
     
-    setIsAnimating(true)
+    const touch = e.touches[0]
+    const deltaX = touch.clientX - touchStartRef.current.x
+    const deltaY = touch.clientY - touchStartRef.current.y
+    
+    setSwipeOffset({ x: deltaX, y: deltaY })
+  }
 
-    try {
-      if (action === 'dismiss') {
-        // Mark as dismissed
-        await fetch(`/api/proposals/${currentProposal.id}/state`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({ state: 'dismissed' }),
-        })
+  const handleTouchEnd = () => {
+    if (!touchStartRef.current || isAnimating) return
+    
+    const threshold = 100 // pixels needed to trigger action
+    const { x, y } = swipeOffset
+    
+    // Determine action based on swipe direction and magnitude
+    if (Math.abs(x) > Math.abs(y)) {
+      // Horizontal swipe
+      if (x > threshold) {
+        handleAction('support') // Swipe right
+      } else if (x < -threshold) {
+        handleAction('dismiss') // Swipe left
       } else {
-        // Submit support signal
-        await fetch(`/api/proposals/${currentProposal.id}/signal`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({ type: action, visibility: 'public' }),
-        })
+        // Snap back if threshold not met
+        setSwipeOffset({ x: 0, y: 0 })
+        setIsDragging(false)
       }
-
-      // Move to next proposal after short animation
-      setTimeout(() => {
-        setCurrentIndex(prev => prev + 1)
-        setIsAnimating(false)
-      }, 300)
-    } catch (error) {
-      console.error('Error submitting action:', error)
-      setIsAnimating(false)
+    } else {
+      // Vertical swipe
+      if (y < -threshold) {
+        handleAction('supersupport') // Swipe up
+      } else if (y > threshold) {
+        handleAction('oppose') // Swipe down
+      } else {
+        // Snap back if threshold not met
+        setSwipeOffset({ x: 0, y: 0 })
+        setIsDragging(false)
+      }
     }
+    
+    touchStartRef.current = null
   }
 
   const totalSupport = currentProposal.supportStats.supports + currentProposal.supportStats.supersupports
   const threshold = currentProposal.threshold || 0
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 px-4">
       {/* Progress Indicator */}
       <div className="text-center">
-        <div className="text-sm text-gray-500 mb-2">
+        <div className="text-sm text-muted-foreground mb-2 mt-4">
           {currentIndex + 1} of {proposals.length} • {remainingCount - 1} remaining
         </div>
-        <div className="w-full bg-gray-200 rounded-full h-1">
+        <div className="w-full progress-bar h-1">
           <div 
-            className="bg-orange-500 h-1 rounded-full transition-all duration-300"
+            className="progress-fill h-1"
             style={{ width: `${((currentIndex + 1) / proposals.length) * 100}%` }}
           />
         </div>
       </div>
 
-      {/* Proposal Card */}
-      <Card className={`transition-all duration-300 ${isAnimating ? 'scale-95 opacity-50' : 'scale-100 opacity-100'}`}>
+      {/* Proposal Card with Swipe Support */}
+      <div 
+        ref={cardRef}
+        className="relative touch-none"
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
+        {/* Swipe Direction Indicators */}
+        {isDragging && (
+          <>
+            {swipeOffset.x > 50 && (
+              <div className="absolute top-4 left-4 z-10 bg-green-500 text-white px-3 py-1 rounded-full text-sm font-bold animate-pulse">
+                SUPPORT
+              </div>
+            )}
+            {swipeOffset.x < -50 && (
+              <div className="absolute top-4 right-4 z-10 bg-gray-500 text-white px-3 py-1 rounded-full text-sm font-bold animate-pulse">
+                DISMISS
+              </div>
+            )}
+            {swipeOffset.y < -50 && (
+              <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-bold animate-pulse">
+                SUPER
+              </div>
+            )}
+            {swipeOffset.y > 50 && (
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold animate-pulse">
+                OPPOSE
+              </div>
+            )}
+          </>
+        )}
+        <Card 
+          className={`transition-all ${isDragging ? 'duration-0' : exitAnimation ? 'duration-500' : 'duration-300'}`}
+          style={{
+            transform: exitAnimation 
+              ? `${
+                  exitAnimation === 'left' ? 'translateX(-150%) rotate(-30deg)' :
+                  exitAnimation === 'right' ? 'translateX(150%) rotate(30deg)' :
+                  exitAnimation === 'up' ? 'translateY(-150%) rotate(10deg)' :
+                  exitAnimation === 'down' ? 'translateY(150%) rotate(-10deg)' :
+                  ''
+                }`
+              : `translate(${swipeOffset.x}px, ${swipeOffset.y}px) rotate(${swipeOffset.x * 0.1}deg)`,
+            opacity: exitAnimation 
+              ? 0 
+              : isDragging 
+                ? 1 - Math.abs(swipeOffset.x) / 500 
+                : 1
+          }}
+        >
         {/* Image Gallery */}
         {(currentProposal.images?.length || currentProposal.imageUrl) && (
           <div className="relative w-full">
@@ -201,40 +324,40 @@ export function TinderFeed({ proposals }: TinderFeedProps) {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="prose max-w-none">
-            <p className="whitespace-pre-wrap text-gray-700">{currentProposal.note}</p>
+            <p className="whitespace-pre-wrap text-foreground">{currentProposal.note}</p>
           </div>
 
           {/* Suggested Event Date */}
           {currentProposal.suggestedEventDate && (
-            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="p-3 status-info border-info rounded-lg">
               <div className="text-sm">
-                <span className="font-medium text-blue-800">📅 Suggested timing:</span>
-                <span className="text-blue-700 ml-1">{currentProposal.suggestedEventDate}</span>
+                <span className="font-medium">📅 Suggested timing:</span>
+                <span className="ml-1">{currentProposal.suggestedEventDate}</span>
               </div>
             </div>
           )}
 
           {/* Support Stats */}
-          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-            <div className="text-sm text-gray-600">
+          <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
+            <div className="text-sm text-muted-foreground">
               <span className="font-medium">Support:</span> {totalSupport}
               {threshold > 0 && <span> / {threshold} needed</span>}
             </div>
             <div className="flex items-center space-x-3 text-sm">
-              <span className="text-green-600">💚 {currentProposal.supportStats.supports}</span>
-              <span className="text-blue-600">⭐ {currentProposal.supportStats.supersupports}</span>
-              <span className="text-red-600">👎 {currentProposal.supportStats.opposes}</span>
+              <span className="text-green-600 dark:text-green-400">💚 {currentProposal.supportStats.supports}</span>
+              <span className="text-blue-600 dark:text-blue-400">⭐ {currentProposal.supportStats.supersupports}</span>
+              <span className="text-red-600 dark:text-red-400">👎 {currentProposal.supportStats.opposes}</span>
             </div>
           </div>
 
           {/* External Chat */}
           {currentProposal.externalChatUrl && (
-            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="p-3 status-info border-info rounded-lg">
               <a 
                 href={currentProposal.externalChatUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                className="text-sm font-medium hover:underline"
               >
                 💬 Join Discussion →
               </a>
@@ -243,12 +366,13 @@ export function TinderFeed({ proposals }: TinderFeedProps) {
 
           {/* Expiration */}
           {currentProposal.expiresAt && (
-            <div className="text-xs text-gray-500 text-center">
-              Expires {new Date(currentProposal.expiresAt).toLocaleString()}
+            <div className="text-xs text-muted-foreground text-center">
+              Expires {new Date(currentProposal.expiresAt).toLocaleString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
             </div>
           )}
         </CardContent>
       </Card>
+      </div>
 
       {/* Tinder-style Action Buttons */}
       <div className="space-y-4">
@@ -258,11 +382,11 @@ export function TinderFeed({ proposals }: TinderFeedProps) {
             onClick={() => handleAction('dismiss')}
             disabled={isAnimating}
             variant="outline"
-            className="aspect-square p-0 border-gray-300 hover:bg-gray-50"
+            className="aspect-square p-0 border-muted hover:bg-muted"
           >
             <div className="flex flex-col items-center space-y-1">
-              <ArrowLeft className="h-5 w-5 text-gray-600" />
-              <span className="text-xs text-gray-600">Dismiss</span>
+              <ArrowLeft className="h-5 w-5 text-muted-foreground" />
+              <span className="text-xs text-muted-foreground">Dismiss</span>
             </div>
           </Button>
           
@@ -270,7 +394,7 @@ export function TinderFeed({ proposals }: TinderFeedProps) {
             onClick={() => handleAction('oppose')}
             disabled={isAnimating}
             variant="outline"
-            className="aspect-square p-0 border-red-300 hover:bg-red-50"
+            className="aspect-square p-0 border-red-300 dark:border-red-800 hover-error"
           >
             <div className="flex flex-col items-center space-y-1">
               <ArrowDown className="h-5 w-5 text-red-600" />
@@ -282,7 +406,7 @@ export function TinderFeed({ proposals }: TinderFeedProps) {
             onClick={() => handleAction('support')}
             disabled={isAnimating}
             variant="outline"
-            className="aspect-square p-0 border-green-300 hover:bg-green-50"
+            className="aspect-square p-0 border-green-300 dark:border-green-800 hover-success"
           >
             <div className="flex flex-col items-center space-y-1">
               <ArrowRight className="h-5 w-5 text-green-600" />
@@ -294,7 +418,7 @@ export function TinderFeed({ proposals }: TinderFeedProps) {
             onClick={() => handleAction('supersupport')}
             disabled={isAnimating}
             variant="outline"
-            className="aspect-square p-0 border-blue-300 hover:bg-blue-50"
+            className="aspect-square p-0 border-blue-300 dark:border-blue-800 hover-info"
           >
             <div className="flex flex-col items-center space-y-1">
               <ArrowUp className="h-5 w-5 text-blue-600" />
@@ -303,9 +427,10 @@ export function TinderFeed({ proposals }: TinderFeedProps) {
           </Button>
         </div>
 
-        {/* Keyboard Shortcuts Help */}
-        <div className="text-center text-xs text-gray-400">
-          <div>← Dismiss • ↓ Oppose • → Support • ↑ Super Support</div>
+        {/* Keyboard Shortcuts & Swipe Help */}
+        <div className="text-center text-xs text-muted-foreground">
+          <div className="md:hidden">Swipe: ← Dismiss • ↓ Oppose • → Support • ↑ Super</div>
+          <div className="hidden md:block">← Dismiss • ↓ Oppose • → Support • ↑ Super Support</div>
           <div className="mt-1">
             <Link href={`/p/${currentProposal.id}`} className="text-blue-500 hover:text-blue-700">
               View Full Details

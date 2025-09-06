@@ -8,7 +8,7 @@ interface AuthenticatedLayoutProps {
 
 export async function AuthenticatedLayout({ children }: AuthenticatedLayoutProps) {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* Desktop navbar - hidden on mobile */}
       <div className="hidden md:block">
         <Navbar />
